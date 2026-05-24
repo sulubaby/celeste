@@ -1,28 +1,117 @@
-body, html {
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    justify-content: center; 
-    align-items: center;     
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.game-container {
-    position: relative;
-
-    border: 1px solid black;
-    background-color: azure;
-    width: 70%;
-    height: 90%;
-
-    overflow: hidden;
+body {
+  height: 100vh;
+  overflow: hidden;
+  background: #050816;
+  font-family: Arial, sans-serif;
 }
 
-.player {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    background: red;
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(#101a3d, #1d2b53);
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* Far background */
+#bg-layer {
+  z-index: 1;
+  background:
+    radial-gradient(circle at 20% 20%, #ffffff55 1px, transparent 2px),
+    radial-gradient(circle at 70% 35%, #ffffff44 1px, transparent 2px),
+    linear-gradient(#0b102f, #17245c);
+  background-size: 300px 300px, 400px 400px, 100% 100%;
+}
+
+/* Mid background */
+#mid-layer {
+  z-index: 2;
+}
+
+.mountain {
+  position: absolute;
+  bottom: 0;
+  width: 500px;
+  height: 300px;
+  background: #24346d;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  opacity: 0.8;
+}
+
+/* Platforms */
+#platform-layer {
+  z-index: 3;
+}
+
+.platform {
+  position: absolute;
+  background: #6ec6ff;
+  border: 3px solid #d9f3ff;
+  border-radius: 6px;
+  box-shadow: 0 0 12px #3da5d9;
+}
+
+/* Player placeholder */
+#player-layer {
+  z-index: 4;
+}
+
+#player {
+  position: absolute;
+  width: 36px;
+  height: 48px;
+  background: #ff5c8a;
+  border: 3px solid #ffd1dc;
+  border-radius: 8px;
+  transform: translate(120px, 420px);
+}
+
+/* UI */
+#ui-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+#scoreboard {
+  display: flex;
+  gap: 20px;
+  padding: 14px 18px;
+  color: white;
+  font-size: 18px;
+  background: #00000055;
+}
+
+#pause-menu {
+  pointer-events: auto;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 16px;
+  background: #000000aa;
+  color: white;
+  text-align: center;
+}
+
+#pause-menu button {
+  padding: 12px 30px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none !important;
 }

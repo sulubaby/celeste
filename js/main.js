@@ -1,26 +1,56 @@
-import { createPlayer } from "./core/entities/player.js";
-import { input, setInputs } from "./core/input.js";
+import { createEnvironment } from "./environments/environment.js";
 
-const container = document.querySelector('.game-container');
+const fpsElement = document.getElementById("fps");
+const timeElement = document.getElementById("time");
+const pauseMenu = document.getElementById("pause-menu");
+const continueButton = document.getElementById("continue-btn");
+const restartButton = document.getElementById("restart-btn");
 
-const player = createPlayer();
+let isPaused = false;
+let lastTime = performance.now();
+let gameTime = 0;
 
-container.appendChild(player.element);
-setInputs('w','d','a');
+createEnvironment();
 
-function game() {
+function gameLoop(currentTime) {
+  const deltaTime = currentTime - lastTime;
+  lastTime = currentTime;
 
-    if (input["right"]) {
-        player.x += player.speed;
-    }
-    if(input.left) {
-        player.x -= player.speed;
-    }
+  if (!isPaused) {
+    update(deltaTime);
+    renderFPS(deltaTime);
+  }
 
-    player.element.style.transform =
-        `translate(${player.x}px, ${player.y}px)`;
-
-    requestAnimationFrame(game);
+  requestAnimationFrame(gameLoop);
 }
 
-game();
+function update(deltaTime) {
+  gameTime += deltaTime / 1000;
+  timeElement.textContent = Math.floor(gameTime);
+}
+
+function renderFPS(deltaTime) {
+  const fps = Math.round(1000 / deltaTime);
+  fpsElement.textContent = fps;
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    togglePause();
+  }
+});
+
+continueButton.addEventListener("click", () => {
+  togglePause();
+});
+
+restartButton.addEventListener("click", () => {
+  location.reload();
+});
+
+function togglePause() {
+  isPaused = !isPaused;
+  pauseMenu.classList.toggle("hidden", !isPaused);
+}
+
+requestAnimationFrame(gameLoop);
