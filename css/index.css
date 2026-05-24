@@ -67,15 +67,7 @@ body {
   z-index: 4;
 }
 
-#player {
-  position: absolute;
-  width: 36px;
-  height: 48px;
-  background: #ff5c8a;
-  border: 3px solid #ffd1dc;
-  border-radius: 8px;
-  transform: translate(120px, 420px);
-}
+
 
 /* UI */
 #ui-layer {

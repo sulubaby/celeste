@@ -1,7 +1,6 @@
 import { animationData, animationState, positions } from "../../data/data.js";
 import { entities } from "../../data/entities.js";
-import { input } from "../systems/input.js";
-
+import {input} from "../system/input.js"
 export function createPlayer(
     playerHeight = 32,
     playerWidth = 32,
