@@ -5,9 +5,9 @@
 }
 
 body {
+  background-image: url('../assets/BG.png');
   height: 100vh;
   overflow: hidden;
-  background: #050816;
   font-family: Arial, sans-serif;
 }
 
@@ -16,7 +16,6 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: linear-gradient(#101a3d, #1d2b53);
 }
 
 .layer {
@@ -27,10 +26,6 @@ body {
 /* Far background */
 #bg-layer {
   z-index: 1;
-  background:
-    radial-gradient(circle at 20% 20%, #ffffff55 1px, transparent 2px),
-    radial-gradient(circle at 70% 35%, #ffffff44 1px, transparent 2px),
-    linear-gradient(#0b102f, #17245c);
   background-size: 300px 300px, 400px 400px, 100% 100%;
 }
 
@@ -39,15 +34,7 @@ body {
   z-index: 2;
 }
 
-.mountain {
-  position: absolute;
-  bottom: 0;
-  width: 500px;
-  height: 300px;
-  background: #24346d;
-  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-  opacity: 0.8;
-}
+
 
 /* Platforms */
 #platform-layer {

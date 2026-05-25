@@ -31,38 +31,50 @@ export function createPlayer(
 }
 
 export function updatePlayer() {
+    const player = entities["player"];
+    const state = animationState["player"];
 
-    let direction = 1;
+    let nextAnimation = "idle";
 
-    if (input.left) {
-
-        animationState["player"].spriteName = "run";
-        direction = -1;
-
-    } else if (input.right) {
-
-        animationState["player"].spriteName = "run";
-
-    } else {
-        animationState["player"].spriteName = "idle";
+    if (input.left || input.right) {
+        nextAnimation = "run";
     }
 
-    const player = entities["player"];
+    // Reset frame when animation changes
+    if (state.spriteName !== nextAnimation) {
+        state.spriteName = nextAnimation;
+        state.frame = 0;
+        state.timer = 0;
+    }
+
+    // Store direction instead of resetting it every frame
+    if (input.left) {
+        state.direction = -1;
+    } else if (input.right) {
+        state.direction = 1;
+    }
+
+    if (!state.direction) {
+        state.direction = 1;
+    }
+
+    
 
     const width = parseInt(player.style.width);
     const height = parseInt(player.style.height);
 
-    const state = animationState["player"];
     const anim = animationData["player"][state.spriteName];
+
+    // Prevent frame from going outside the animation frame count
+    if (state.frame >= anim.frameCount) {
+        state.frame = 0;
+    }
 
     const spriteX = width * (anim.startFrame + state.frame);
     const spriteY = height * anim.row;
 
-    player.style.backgroundPosition =
-        `-${spriteX}px -${spriteY}px`;
+    player.style.backgroundPosition = `-${spriteX}px -${spriteY}px`;
 
-
-    // Render player
     player.style.transform =
-        `translate(${positions["player"].x}px, ${positions["player"].y}px) scaleX(${direction})`;
+        `translate(${positions["player"].x}px, ${positions["player"].y}px) scaleX(${state.direction})`;
 }
