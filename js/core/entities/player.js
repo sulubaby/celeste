@@ -1,6 +1,9 @@
 import { animationData, animationState, positions } from "../../data/data.js";
-import { entities } from "../../data/entities.js";
-import {input} from "../system/input.js"
+import { entities, } from "../../data/entities.js";
+import { applyGravity } from "../components/gravity.js";
+import { input } from "../system/input.js"
+import { onGround } from "../system/physics.js";
+
 export function createPlayer(
     playerHeight = 32,
     playerWidth = 32,
@@ -21,11 +24,16 @@ export function createPlayer(
     element.style.overflow = "hidden";
     element.style.backgroundSize = "auto";
     element.style.willChange = "transform";
+    element.style.scale = 0.7;
     element.id = "player";
+
+
 
     positions["player"] = {
         x: spawnX,
-        y: spawnY
+        y: spawnY,
+        vy: 0,
+        isJumping: false,
     }
     return element;
 }
@@ -33,12 +41,19 @@ export function createPlayer(
 export function updatePlayer() {
     const player = entities["player"];
     const state = animationState["player"];
-
+    const pos = positions["player"];
     let nextAnimation = "idle";
 
-    if (input.left || input.right) {
+    if (!onGround()) {
+        if(positions.player.vy < 0) {
+            nextAnimation = "jump";
+        } else {
+            nextAnimation = "fall";
+        }
+    } else if (input.left || input.right) {
         nextAnimation = "run";
     }
+
 
     // Reset frame when animation changes
     if (state.spriteName !== nextAnimation) {
@@ -53,12 +68,6 @@ export function updatePlayer() {
     } else if (input.right) {
         state.direction = 1;
     }
-
-    if (!state.direction) {
-        state.direction = 1;
-    }
-
-    
 
     const width = parseInt(player.style.width);
     const height = parseInt(player.style.height);
