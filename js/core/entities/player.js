@@ -1,89 +1,64 @@
-import { animationData, animationState, positions } from "../../data/data.js";
-import { entities, } from "../../data/entities.js";
-import { applyGravity } from "../components/gravity.js";
-import { input } from "../system/input.js"
-import { onGround } from "../system/physics.js";
+import { player } from "../../main.js";
 
-export function createPlayer(
-    playerHeight = 32,
-    playerWidth = 32,
-    playerSpeed = 100,
-    spawnY = 0,
-    spawnX = 0,
-    spriteSheet = ""
-) {
-    const element = document.createElement("div");
+export class Player {
+    position = {
+        x: 0,
+        y: 0
+    };
 
-    element.style.backgroundImage = `url(${spriteSheet})`;
-    element.style.transform = `translate(${spawnX}px, ${spawnY}px)`;
-    element.style.height = `${playerHeight}px`;
-    element.style.width = `${playerWidth}px`;
-    element.style.position = "absolute";
-    element.style.backgroundRepeat = "no-repeat";
-    element.style.imageRendering = "pixelated";
-    element.style.overflow = "hidden";
-    element.style.backgroundSize = "auto";
-    element.style.willChange = "transform";
-    element.style.scale = 0.7;
-    element.id = "player";
+    dimensions = {
+        height: 0,
+        width: 0
+    };
 
+    components = {
+        speed: 500,
+    };
 
+    playerElemant = document.createElement("div");
+    #spritesheet;
 
-    positions["player"] = {
-        x: spawnX,
-        y: spawnY,
-        vy: 0,
-        isJumping: false,
-    }
-    return element;
-}
+    constructor(
+        position = { x: 0, y: 0 },
+        dimensions = { height: 0, width: 0 },
+        components = { speed: 500 }
+    ) {
+        this.position.x = position.x;
+        this.position.y = position.y;
 
-export function updatePlayer() {
-    const player = entities["player"];
-    const state = animationState["player"];
-    const pos = positions["player"];
-    let nextAnimation = "idle";
+        this.dimensions.height = dimensions.height;
+        this.dimensions.width = dimensions.width;
 
-    if (!onGround()) {
-        if(positions.player.vy < 0) {
-            nextAnimation = "jump";
-        } else {
-            nextAnimation = "fall";
-        }
-    } else if (input.left || input.right) {
-        nextAnimation = "run";
+        this.components.speed = components.speed ?? 500;
+
+        this.#initElemant();
     }
 
-
-    // Reset frame when animation changes
-    if (state.spriteName !== nextAnimation) {
-        state.spriteName = nextAnimation;
-        state.frame = 0;
-        state.timer = 0;
+    #initElemant() {
+        this.playerElemant.style.height = `${this.dimensions.height}px`;
+        this.playerElemant.style.width = `${this.dimensions.width}px`;
+        this.playerElemant.style.transform = `translate(${this.position.x}px, ${this.position.y}px)`;
+        this.playerElemant.style.position = "absolute";
+        this.playerElemant.style.backgroundRepeat = "no-repeat";
+        this.playerElemant.style.imageRendering = "pixelated";
+        this.playerElemant.style.overflow = "hidden";
+        this.playerElemant.style.backgroundSize = "auto";
+        this.playerElemant.style.willChange = "transform";
+        this.playerElemant.style.scale = "0.7";
+        this.playerElemant.id = "player";
     }
 
-    // Store direction instead of resetting it every frame
-    if (input.left) {
-        state.direction = -1;
-    } else if (input.right) {
-        state.direction = 1;
+    setSpriteSheet(spriteSheet = "") {
+        this.#spritesheet = spriteSheet;
+        this.playerElemant.style.backgroundImage = `url(${spriteSheet})`;
     }
 
-    const width = parseInt(player.style.width);
-    const height = parseInt(player.style.height);
-
-    const anim = animationData["player"][state.spriteName];
-
-    // Prevent frame from going outside the animation frame count
-    if (state.frame >= anim.frameCount) {
-        state.frame = 0;
+    appendPlayer(parent = document.body) {
+        parent.appendChild(this.playerElemant);
     }
 
-    const spriteX = width * (anim.startFrame + state.frame);
-    const spriteY = height * anim.row;
-
-    player.style.backgroundPosition = `-${spriteX}px -${spriteY}px`;
-
-    player.style.transform =
-        `translate(${positions["player"].x}px, ${positions["player"].y}px) scaleX(${state.direction})`;
+    update() {
+        this.playerElemant.style.transform =
+            `translate(${this.position.x}px, ${this.position.y}px)`;
+    }
 }

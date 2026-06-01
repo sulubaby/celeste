@@ -1,23 +1,31 @@
-import { positions } from "../../data/data.js";
-
-export const input = {
-    left: false,
-    right: false,
-    jump: false
+export const keys = {
+    left: "a",
+    right: "d",
+    jump: "w",
+    dash: "Shift"
 };
 
-export function initInput(rightKey = "d", leftKey = "a", JumpKey = "w") {
-    window.addEventListener('keydown', (e) => {
-        if (e.key === rightKey) input.right = true;
-        if (e.key === leftKey) input.left = true;
-        if (e.key === JumpKey) input.jump = true;
-    });
+export const input = [];
 
-    window.addEventListener('keyup', (e) => {
-        if (e.key === rightKey) input.right = false;
-        if (e.key === leftKey) input.left = false;
-        if (e.key === JumpKey) input.jump = false;
-    });
+export function initInput(leftKey = "a", rightKey = "d", jumpKey = "w", dashKey = "Shift") {
+    keys.left = leftKey;
+    keys.right = rightKey;
+    keys.jump = jumpKey;
+    keys.dash = dashKey;
+
+    window.addEventListener("keydown", detectInput);
+    window.addEventListener("keyup", removeKey);
 }
 
+function detectInput(e) {
+    if (!input.includes(e.key)) {
+        input.push(e.key);
+    }
+}
 
+function removeKey(e) {
+    const index = input.indexOf(e.key);
+    if (index !== -1) {
+        input.splice(index, 1);
+    }
+}

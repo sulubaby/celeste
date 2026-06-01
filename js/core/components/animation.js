@@ -1,20 +1,26 @@
-import { animationData, animationState } from "../../data/data.js";
-
-export function addAnimation(entityID, spriteName, data = {
-    row: 0,
-    startFrame: 0,
-    frameCount: 0,
-    fps: 10
-}) {
-    if(!animationData[entityID]) {
-        animationData[entityID] = {};
+export function addAnimation(
+    entity,
+    spriteName,
+    data = {
+        row: 0,
+        startFrame: 0,
+        frameCount: 0,
+        fps: 10
     }
-    animationData[entityID][spriteName] = data;
+) {
+    entity.components ??= {};
 
-    if(!animationState[entityID]) {
-        animationState[entityID] = {
-            spriteName: spriteName,
-            frame: 0
-        };
+    entity.components.animation ??= {
+        state: {
+            frame: 0,
+            sprite: ""
+        },
+        sprites: {}
+    };
+
+    if (entity.components.animation.sprites[spriteName]) {
+        return;
     }
+
+    entity.components.animation.sprites[spriteName] = data;
 }
