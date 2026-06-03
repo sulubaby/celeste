@@ -13,6 +13,7 @@ export class Player {
 
     components = {
         speed: 500,
+        direction: 0
     };
 
     playerElemant = document.createElement("div");
@@ -58,7 +59,27 @@ export class Player {
     }
 
     update() {
+
         this.playerElemant.style.transform =
-            `translate(${this.position.x}px, ${this.position.y}px)`;
+            `translate(${this.position.x}px, ${this.position.y}px)
+            scaleX(${this.components.direction})`;
+
+        const animation = this.components.animation;
+
+        if (!animation) return;
+
+        const sprite =
+            animation.sprites[animation.state.sprite];
+
+        if (!sprite) return;
+
+        const frame =
+            sprite.startFrame + animation.state.frame;
+
+        const frameWidth = this.dimensions.width;
+        const frameHeight = this.dimensions.height;
+
+        this.playerElemant.style.backgroundPosition =
+            `-${frame * frameWidth}px -${sprite.row * frameHeight}px`;
     }
 }

@@ -13,7 +13,8 @@ export function addAnimation(
     entity.components.animation ??= {
         state: {
             frame: 0,
-            sprite: ""
+            sprite: "",
+            timer: 0
         },
         sprites: {}
     };
