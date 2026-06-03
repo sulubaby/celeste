@@ -1,5 +1,6 @@
-export const GRAVITY = 1500;
-export const GROUND_Y = 500;
+
+export const GRAVITY = 1700;
+export const GROUND_Y = document.getElementById('game').getBoundingClientRect().height;
 export const MAX_FALL_SPEED = 1200;
 
 export function gravity(dt, entity) {
@@ -14,7 +15,7 @@ export function gravity(dt, entity) {
 
     entity.position.y += physics.vy * dt;
 
-    if (entity.position.y + entity.dimensions.height >= GROUND_Y) {
+    if (onGround(entity)) {
 
         entity.position.y = GROUND_Y - entity.dimensions.height;
 
@@ -22,3 +23,12 @@ export function gravity(dt, entity) {
         physics.isJumping = false;
     }
 }
+
+export function onGround(entity) {
+    return (
+        entity.position.y + entity.dimensions.height >=
+        GROUND_Y - 1
+    );
+}
+
+

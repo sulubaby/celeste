@@ -1,28 +1,24 @@
 export function animationSystem(dt, entity) {
-
     const animation = entity.components?.animation;
 
-    if (!animation) return;
+    if (!animation) {
+        return;
+    }
 
-    const currentSprite =
-        animation.sprites[animation.state.sprite];
+    const current = animation.sprites[animation.state.sprite];
 
-    if (!currentSprite) return;
-
-    dt /= 1000;
+    if (!current || current.frameCount <= 1) {
+        return;
+    }
 
     animation.state.timer += dt;
 
-    const frameDuration = 1 / currentSprite.fps;
+    const frameDuration = 1 / current.fps;
 
     while (animation.state.timer >= frameDuration) {
-
         animation.state.timer -= frameDuration;
 
-        animation.state.frame++;
-
-        if (animation.state.frame >= currentSprite.frameCount) {
-            animation.state.frame = 0;
-        }
+        animation.state.frame =
+            (animation.state.frame + 1) % current.frameCount;
     }
 }

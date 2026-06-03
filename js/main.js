@@ -6,10 +6,12 @@ import { playerMovment } from "./core/system/playerMovment.js";
 import { animationSystem } from "./core/system/animationSystem.js";
 import { applyGravity } from "./core/components/physics.js";
 import { gravity } from "./core/system/physicsSystem.js";
+import { addDashing } from "./core/components/movement.js";
 
 const fpsElement = document.getElementById("fps");
 const timeElement = document.getElementById("time");
 const pauseMenu = document.getElementById("pause-menu");
+export const gameContainer = document.getElementById('game');
 
 let isPaused = false;
 let lastTime = performance.now();
@@ -24,7 +26,7 @@ export const player = new Player(
 );
 
 player.setSpriteSheet("./assets/player.png");
-player.appendPlayer(document.getElementById("mid-layer"));
+player.appendPlayer(gameContainer);
 
 addAnimation(player, "idle", {
     row: 5,
@@ -40,7 +42,15 @@ addAnimation(player, "run", {
     fps: 12
 });
 
+addAnimation(player, "fall", {
+    row: 9,
+    startFrame: 3,
+    frameCount: 8,
+    fps: 12
+})
+
 applyGravity(player, {vy: 0, isJumping: false})
+addDashing(player, 50);
 
 player.components.animation.state.sprite = "idle";
 

@@ -2,12 +2,12 @@ export const keys = {
     left: "a",
     right: "d",
     jump: "w",
-    dash: "Shift"
+    dash: "q"
 };
 
 export const input = [];
 
-export function initInput(leftKey = "a", rightKey = "d", jumpKey = "w", dashKey = "Shift") {
+export function initInput(leftKey = "a", rightKey = "d", jumpKey = "w", dashKey = "q") {
     keys.left = leftKey;
     keys.right = rightKey;
     keys.jump = jumpKey;
@@ -17,7 +17,7 @@ export function initInput(leftKey = "a", rightKey = "d", jumpKey = "w", dashKey 
     window.addEventListener("keyup", removeKey);
 }
 
-function detectInput(e) {
+export function detectInput(e) {
     if (!input.includes(e.key)) {
         input.push(e.key);
     }

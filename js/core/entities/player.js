@@ -13,8 +13,11 @@ export class Player {
 
     components = {
         speed: 500,
-        direction: 0
+        direction: 0,
+        
     };
+
+    
 
     playerElemant = document.createElement("div");
     #spritesheet;
