@@ -14,8 +14,8 @@ function playAnimation(entity, sprite) {
 }
 
 export function playerMovment(player, dt) {
-
     let moving = false;
+
     if (input.includes(keys.left)) {
         player.position.x -= player.components.speed * dt;
         player.components.direction = -1;
@@ -33,17 +33,15 @@ export function playerMovment(player, dt) {
         player.components.physics.gravity.isJumping = true;
     }
 
-    if (input.includes(keys.dash) && !player.components.powers.dash.isDashing) {
-        player.components.powers.dash.isDashing = true;
-        let dashDirection = 0;
-        if(input.includes(keys.right)) {
-            dashDirection = 1;
-        } else if(input.includes(keys.left)) {
-            dashDirection = -1
-        }
-        dash(player, dt);
-    }
+    const dashData = player.components.powers.dash;
 
+    if (
+        input.includes(keys.dash) &&
+        !dashData.isDashing &&
+        !dashData.onCooldown
+    ) {
+        dash(player);
+    }
 
     if (!onGround(player)) {
         if (player.components.physics.gravity.vy < 0) {
@@ -56,29 +54,61 @@ export function playerMovment(player, dt) {
     } else {
         playAnimation(player, "idle");
     }
-
 }
 
-function dash(player, dt) {
-    const maxDistance = 140;
+function dash(player) {
+    const dash = player.components.powers.dash;
+    const maxDistance = 250;
 
-    player.components.powers.dash.distanceTravelled = 0;
-    player.components.powers.dash.isDashing = true;
+    dash.distanceTravelled = 0;
+    dash.isDashing = true;
+
+    const airDash = player.components.physics.gravity.isJumping;
+
+    const movingLeft = input.includes(keys.left);
+    const movingRight = input.includes(keys.right);
+
+    const verticalDash =
+        airDash &&
+        !movingLeft &&
+        !movingRight;
 
     let loop;
 
     function perform() {
+        if (verticalDash) {
+            player.position.y -= dash.dashPower;
+        } else if (airDash) {
 
-        player.position.x +=
-            player.components.powers.dash.dashPower *
-            player.components.direction;
+            if (movingLeft) {
+                player.position.x -= dash.dashPower / 2;
+                console.log('dash left')
+            }
 
-        player.components.powers.dash.distanceTravelled +=
-            player.components.powers.dash.dashPower;
+            if (movingRight) {
+                player.position.x += dash.dashPower / 2;
+                console.log('dash right')
 
-        if (player.components.powers.dash.distanceTravelled >= maxDistance) {
+            }
+
+            player.position.y -= dash.dashPower / 2;
+        } else {
+            player.position.x +=
+                dash.dashPower *
+                player.components.direction;
+        }
+
+        dash.distanceTravelled += dash.dashPower;
+
+        if (dash.distanceTravelled >= maxDistance) {
             clearInterval(loop);
-            player.components.powers.dash.isDashing = false;
+
+            dash.isDashing = false;
+            dash.onCooldown = true;
+
+            setTimeout(() => {
+                dash.onCooldown = false;
+            }, 1000);
         }
     }
 

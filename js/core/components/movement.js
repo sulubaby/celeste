@@ -8,6 +8,7 @@ export function addDashing(entity, dashPower = 30) {
     entity.components.powers.dash = {
         isDashing: false,
         dashPower: dashPower,
-        distanceTravelled: 0
+        distanceTravelled: 0,
+        onCoolDown: false
     }
 }
