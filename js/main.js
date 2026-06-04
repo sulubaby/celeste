@@ -7,6 +7,7 @@ import { animationSystem } from "./core/system/animationSystem.js";
 import { applyGravity } from "./core/components/physics.js";
 import { gravity } from "./core/system/physicsSystem.js";
 import { addDashing } from "./core/components/movement.js";
+import { createPlatforms } from "./environments/platforms.js";
 
 const fpsElement = document.getElementById("fps");
 const timeElement = document.getElementById("time");
@@ -17,7 +18,9 @@ let isPaused = false;
 let lastTime = performance.now();
 let gameTime = 0;
 
-createEnvironment();
+//createEnvironment();
+const game = document.getElementById("game");
+createPlatforms(game);
 
 export const player = new Player(
     { x: 100, y: 100 },
