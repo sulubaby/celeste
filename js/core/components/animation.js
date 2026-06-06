@@ -25,3 +25,13 @@ export function addAnimation(
 
     entity.components.animation.sprites[spriteName] = data;
 }
+
+export function playAnimation(entity, sprite) {
+    const animation = entity.components.animation;
+
+    if (animation.state.sprite === sprite) return;
+
+    animation.state.sprite = sprite;
+    animation.state.frame = 0;
+    animation.state.timer = 0;
+}

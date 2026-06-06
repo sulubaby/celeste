@@ -1,12 +1,9 @@
 import { createEnvironment } from "./environments/environment.js";
-import { addAnimation } from "./core/components/animation.js";
-import { Player } from "./core/entities/player.js";
-import { initInput } from "./core/system/input.js";
-import { playerMovment } from "./core/system/playerMovment.js";
-import { animationSystem } from "./core/system/animationSystem.js";
-import { applyGravity } from "./core/components/physics.js";
-import { gravity } from "./core/system/physicsSystem.js";
-import { addDashing } from "./core/components/movement.js";
+import { initInput, keys } from "./core/system/input.js";
+import { createPlayer } from "./core/entities/player.js";
+import { Level } from "./core/level.js";
+import { animationSystem } from "./core/system/animationSystem.js"
+import { gravity, setGroundY } from "./core/system/physicsSystem.js";
 import { createPlatforms } from "./environments/platforms.js";
 
 const fpsElement = document.getElementById("fps");
@@ -22,55 +19,37 @@ let gameTime = 0;
 const game = document.getElementById("game");
 createPlatforms(game);
 
-export const player = new Player(
-    { x: 100, y: 100 },
-    { height: 128, width: 128 },
-    { speed: 500 }
+export const mainLevel = new Level(
+    { height: 800, width: 5000 }
 );
 
-player.setSpriteSheet("./assets/player.png");
-player.appendPlayer(gameContainer);
+setGroundY(mainLevel.dimensions.height);
 
-addAnimation(player, "idle", {
-    row: 5,
-    startFrame: 6,
-    frameCount: 4,
-    fps: 10
-});
+mainLevel.setParent(game);
+mainLevel.addSystem(gravity);
 
-addAnimation(player, "run", {
-    row: 0,
-    startFrame: 0,
-    frameCount: 8,
-    fps: 12
-});
-
-addAnimation(player, "fall", {
-    row: 9,
-    startFrame: 3,
-    frameCount: 8,
-    fps: 12
-})
-
-applyGravity(player, {vy: 0, isJumping: false})
-addDashing(player, 50);
+export const player = createPlayer(
+    { x: 100, y: 100 },
+    { height: 128, width: 128 },
+    "./assets/player.png"
+);
 
 player.components.animation.state.sprite = "idle";
+mainLevel.addEntity(player);
+mainLevel.mountEntities();
+mainLevel.addSystem(animationSystem);
+player.components.powers.jump.isJumping = false;
+console.log(player);
 
-initInput();
-
+initInput('a', 'd', 'w', 'q');
+console.log(keys);
 function update(deltaTime) {
     const dt = deltaTime / 1000;
-
-    playerMovment(player, dt);
-    animationSystem(dt, player);
-    gravity(dt, player)
-    player.update();
-
     gameTime += dt;
+    mainLevel.update(dt);
     timeElement.textContent = Math.floor(gameTime);
 }
-console.log(player)
+
 function renderFPS(deltaTime) {
     fpsElement.textContent = Math.round(1000 / deltaTime);
 }

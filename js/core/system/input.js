@@ -8,6 +8,7 @@ export const keys = {
 export const input = [];
 
 export function initInput(leftKey = "a", rightKey = "d", jumpKey = "w", dashKey = "q") {
+    input.length = 0;
     keys.left = leftKey;
     keys.right = rightKey;
     keys.jump = jumpKey;

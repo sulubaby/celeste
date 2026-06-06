@@ -1,28 +1,33 @@
 import { platforms } from "../../environments/platforms.js";
 
-export const GRAVITY = 1700;
-export const GROUND_Y = document.getElementById('game').getBoundingClientRect().height;
-export const MAX_FALL_SPEED = 1200;
+export let GRAVITY = 1700;
+export let GROUND = 1200;
+export let MAX_FALL_SPEED = 1200;
 
-export function gravity(dt, entity) {
-  const physics = entity.components.physics.gravity;
 
-  physics.vy += GRAVITY * dt;
+export function setGroundY(value) {
+    GROUND = value;
+}
+export function gravity(entities, dt) {
+  entities.forEach((entity) => {
+    const physics = entity.components.physics.gravity;
 
-  if (physics.vy > MAX_FALL_SPEED) {
-    physics.vy = MAX_FALL_SPEED;
-  }
+    physics.vy += GRAVITY * dt;
 
-  entity.position.y += physics.vy * dt;
+    if (physics.vy > MAX_FALL_SPEED) {
+      physics.vy = MAX_FALL_SPEED;
+    }
 
-  if (onGround(entity)) {
-    entity.position.y = GROUND_Y - entity.dimensions.height;
+    entity.position.y += physics.vy * dt;
 
-    physics.vy = 0;
-    physics.isJumping = false;
-  }
+    if (onGround(entity)) {
+      entity.position.y = GROUND - entity.dimensions.height;
+      entity.components.powers.jump.isJumping = false;
+      physics.vy = 0;
+    }
+  });
 
-  //updatePhysics(entity);
+
 }
 
 export function updatePhysics(entity) {
@@ -55,5 +60,5 @@ export function updatePhysics(entity) {
 }
 
 export function onGround(entity) {
-  return entity.position.y + entity.dimensions.height >= GROUND_Y - 1;
+  return entity.position.y + entity.dimensions.height >= GROUND - 1;
 }
