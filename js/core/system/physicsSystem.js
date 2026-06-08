@@ -1,4 +1,4 @@
-import { platforms } from "../../environments/platforms.js";
+import { platforms } from "../../core/entities/platforms.js";
 
 export let GRAVITY = 1700;
 export let GROUND = 1200;
@@ -6,10 +6,18 @@ export let MAX_FALL_SPEED = 1200;
 
 
 export function setGroundY(value) {
-    GROUND = value;
+  GROUND = value;
 }
+
 export function gravity(entities, dt) {
   entities.forEach((entity) => {
+    if (
+      !entity.components ||
+      !entity.components.physics ||
+      !entity.components.physics.gravity
+    ) {
+      return;
+    }
     const physics = entity.components.physics.gravity;
 
     physics.vy += GRAVITY * dt;

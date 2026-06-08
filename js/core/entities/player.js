@@ -4,6 +4,7 @@ import { addAnimation, playAnimation } from "../components/animation.js";
 import { gravity, onGround } from "../system/physicsSystem.js";
 import { applyGravity } from "../components/physics.js";
 import { input, keys } from "../system/input.js";
+import { camera } from "../../main.js";
 
 export function createPlayer(
     position = { x: 400, y: 400 },
@@ -59,7 +60,6 @@ export function createPlayer(
 
 function playerUpdate(entity, dt) {
     let moving = false;
-
     if (input.includes(keys.left)) {
         entity.position.x -= entity.components.powers.speed.speed * dt;
         entity.components.direction = -1;
@@ -88,10 +88,6 @@ function playerUpdate(entity, dt) {
     ) {
         dash(entity);
     }
-
-    entity.elem.style.transform =
-        `translate(${entity.position.x}px, ${entity.position.y}px)
-            scaleX(${entity.components.direction})`;
 
     if (!onGround(entity)) {
         if (entity.components.physics.gravity.vy < 0) {
@@ -136,7 +132,7 @@ function dash(player) {
 
     const movingLeft = input.includes(keys.left);
     const movingRight = input.includes(keys.right);
-    const movingUp = input.includes(keys.jump); 
+    const movingUp = input.includes(keys.jump);
 
     let loop;
 

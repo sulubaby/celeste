@@ -1,4 +1,6 @@
 import { Entity } from "./entities/entity.js";
+import { camera } from "../main.js";
+
 export class Level {
     #parentElement = document.body;
 
@@ -15,11 +17,7 @@ export class Level {
     }
 
     addEntity(entity) {
-        if (!(entity instanceof Entity)) {
-            console.error(`${entity} is not an instance of Entity`);
-            return;
-        }
-
+        if (!(entity instanceof Entity)) return;
         this.entities.push(entity);
     }
 
@@ -37,16 +35,23 @@ export class Level {
         });
     }
 
-    update(dt) {
-        this.systems.forEach((system) => {
-            system(this.entities, dt);
+    render() {
+        this.entities.forEach(entity => {
+            const x = entity.position.x - camera.position.x;
+            const y = entity.position.y - camera.position.y;
+
+            entity.elem.style.transform =
+                `translate(${x}px, ${y}px) scaleX(${entity.components.direction ?? 1})`;
         });
+    }
+
+    update(dt) {
+        this.systems.forEach((system) => system(this.entities, dt));
 
         this.entities.forEach((entity) => {
-            if (entity.update) {
-                entity.update(entity, dt);
-            }
+            if (entity.update) entity.update(entity, dt);
         });
 
+        this.render();
     }
 }

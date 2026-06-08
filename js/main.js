@@ -4,7 +4,8 @@ import { createPlayer } from "./core/entities/player.js";
 import { Level } from "./core/level.js";
 import { animationSystem } from "./core/system/animationSystem.js"
 import { gravity, setGroundY } from "./core/system/physicsSystem.js";
-import { createPlatforms } from "./environments/platforms.js";
+import { createPlatform, createPlatforms } from "./core/entities/platforms.js";
+import { Camera } from "./core/components/camera.js";
 
 const fpsElement = document.getElementById("fps");
 const timeElement = document.getElementById("time");
@@ -17,7 +18,6 @@ let gameTime = 0;
 
 //createEnvironment();
 const game = document.getElementById("game");
-createPlatforms(game);
 
 export const mainLevel = new Level(
     { height: 800, width: 5000 }
@@ -29,20 +29,51 @@ mainLevel.setParent(game);
 mainLevel.addSystem(gravity);
 
 export const player = createPlayer(
-    { x: 100, y: 100 },
+    { x: 0, y: 0 },
     { height: 128, width: 128 },
     "./assets/player.png"
 );
 
 player.components.animation.state.sprite = "idle";
 mainLevel.addEntity(player);
-mainLevel.mountEntities();
 mainLevel.addSystem(animationSystem);
 player.components.powers.jump.isJumping = false;
 console.log(player);
 
+
+// camera
+export const camera = new Camera(player);
+
+// create platform
+for (let i = 0; i < 50; i++) {
+    const x = -300 + i * 50;
+
+    const platform = createPlatform(
+        { height: 50, width: 50 },
+        { x: x, y: 564 }
+    );
+
+    platform.setSpriteSheet("./assets/IceTiles/Ice_3_16x16.png");
+    mainLevel.addEntity(platform);
+}
+
+for (let i = 0; i < 30; i++) {
+    const x = -300 + i * 50;
+
+    const platform = createPlatform(
+        { height: 50, width: 50 },
+        { x: x, y: 400 }
+    );
+
+    platform.setSpriteSheet("./assets/IceTiles/Ice_3_16x16.png");
+    mainLevel.addEntity(platform);
+}
+
 initInput('a', 'd', 'w', 'q');
 console.log(keys);
+
+mainLevel.mountEntities();
+
 function update(deltaTime) {
     const dt = deltaTime / 1000;
     gameTime += dt;
@@ -57,6 +88,7 @@ function renderFPS(deltaTime) {
 function gameLoop(currentTime) {
     const deltaTime = currentTime - lastTime;
     lastTime = currentTime;
+    camera.update();
 
     if (!isPaused) {
         update(deltaTime);
@@ -65,5 +97,4 @@ function gameLoop(currentTime) {
 
     requestAnimationFrame(gameLoop);
 }
-
 requestAnimationFrame(gameLoop);
