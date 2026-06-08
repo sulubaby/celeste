@@ -5,7 +5,7 @@ import { gravity, onGround } from "../system/physicsSystem.js";
 import { applyGravity } from "../components/physics.js";
 import { input, keys } from "../system/input.js";
 import { camera } from "../../main.js";
-
+import { mainLevel } from "../../main.js";
 export function createPlayer(
     position = { x: 400, y: 400 },
     dimensions = { height: 128, width: 128 },
@@ -28,7 +28,7 @@ export function createPlayer(
         row: 5,
         startFrame: 6,
         frameCount: 4,
-        fps: 10
+        fps: 8
     });
 
     addAnimation(player, "run", {
@@ -39,9 +39,9 @@ export function createPlayer(
     });
 
     addAnimation(player, "fall", {
-        row: 9,
-        startFrame: 3,
-        frameCount: 8,
+        row: 11,
+        startFrame: 4,
+        frameCount: 6,
         fps: 12
     });
 
@@ -50,6 +50,12 @@ export function createPlayer(
         startFrame: 0,
         frameCount: 1,
         fps: 12
+    });
+    addAnimation(player, "squeez", {
+        row: 1,
+        startFrame: 0,
+        frameCount: 3,
+        fps: 20
     });
 
     player.setUpdate(playerUpdate);
@@ -60,6 +66,7 @@ export function createPlayer(
 
 function playerUpdate(entity, dt) {
     let moving = false;
+
     if (input.includes(keys.left)) {
         entity.position.x -= entity.components.powers.speed.speed * dt;
         entity.components.direction = -1;
@@ -92,8 +99,10 @@ function playerUpdate(entity, dt) {
     if (!onGround(entity)) {
         if (entity.components.physics.gravity.vy < 0) {
             playAnimation(entity, "jump");
-        } else {
+        } else if (entity.components.physics.gravity.vy > 0) {
             playAnimation(entity, "fall");
+        } else if(entity.components.powers.jump.isJumping == false && entity.components.physics.gravity.vy >= 0) {
+            playAnimation(entity, "squeeze")
         }
     } else if (moving) {
         playAnimation(entity, "run")
@@ -128,55 +137,100 @@ function dash(player) {
     dash.distanceTravelled = 0;
     dash.isDashing = true;
 
-    const airDash = player.components.powers.jump.isJumping;
+    let dx = 0;
+    let dy = 0;
 
-    const movingLeft = input.includes(keys.left);
-    const movingRight = input.includes(keys.right);
-    const movingUp = input.includes(keys.jump);
+    if (input.includes(keys.left)) dx = -1;
+    if (input.includes(keys.right)) dx = 1;
+    if (input.includes(keys.jump)) dy = -1;
+
+    // No direction pressed → dash in facing direction
+    if (dx === 0 && dy === 0) {
+        dx = player.components.direction;
+    }
+
+    // Normalize diagonal dashes
+    const length = Math.hypot(dx, dy);
+
+    if (length > 0) {
+        dx /= length;
+        dy /= length;
+    }
 
     let loop;
 
     function perform() {
-        if (airDash) {
-            if (movingLeft && movingUp) {
-                player.position.x -= dash.dashPower;
-                player.position.y -= dash.dashPower;
-            } else if (movingRight && movingUp) {
-                // Up-right
-                player.position.x += dash.dashPower;
-                player.position.y -= dash.dashPower;
-            } else if (movingUp) {
-                // Straight up
-                player.position.y -= dash.dashPower;
-            } else if (movingLeft) {
-                // Straight left (in air)
-                player.position.x -= dash.dashPower;
-            } else if (movingRight) {
-                // Straight right (in air)
-                player.position.x += dash.dashPower;
-            } else {
-                // Dash in facing direction
-                player.position.x += dash.dashPower * player.components.direction;
-            }
-        } else {
-            if (movingLeft) {
-                player.position.x -= dash.dashPower;
-            } else if (movingRight) {
-                player.position.x += dash.dashPower;
-            } else {
-                player.position.x += dash.dashPower * player.components.direction;
-            }
-        }
+
+        createGhost(player, "./assets/player.png");
+
+        player.position.x += dx * dash.dashPower;
+        player.position.y += dy * dash.dashPower;
 
         dash.distanceTravelled += dash.dashPower;
 
         if (dash.distanceTravelled >= maxDistance) {
             clearInterval(loop);
+
             dash.isDashing = false;
             dash.onCooldown = true;
-            setTimeout(() => { dash.onCooldown = false; }, 1000);
+
+            setTimeout(() => {
+                dash.onCooldown = false;
+            }, 1000);
         }
     }
 
-    loop = setInterval(perform, 20);
+    loop = setInterval(perform, 18);
+}
+
+function createGhost(entity, spriteSheet) {
+
+    const ghost = new Entity(
+        {
+            x: entity.position.x,
+            y: entity.position.y
+        },
+        {
+            width: entity.dimensions.width,
+            height: entity.dimensions.height
+        },
+        "ghost"
+    );
+    ghost.setScale(0.6);
+    ghost.setSpriteSheet(spriteSheet);
+
+    ghost.components.direction = entity.components.direction;
+    
+    mainLevel.addEntity(ghost);
+    mainLevel.mountEntities();
+
+    ghost.elem.style.backgroundPosition =
+        entity.elem.style.backgroundPosition;
+
+    ghost.elem.style.backgroundSize =
+        entity.elem.style.backgroundSize;
+    
+    ghost.elem.style.opacity = "0.7";
+    ghost.elem.style.filter =
+        "brightness(2) hue-rotate(180deg)";
+
+    ghost.elem.style.transition =
+        "opacity 0.15s linear";
+
+    setTimeout(() => {
+        ghost.elem.style.opacity = "0";
+    }, 10);
+
+    setTimeout(() => {
+
+        ghost.elem.remove();
+
+        const index =
+            mainLevel.entities.indexOf(ghost);
+
+        if (index !== -1) {
+            mainLevel.entities.splice(index, 1);
+        }
+
+    }, 160);
 }
