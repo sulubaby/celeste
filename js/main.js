@@ -69,6 +69,8 @@ for (let i = 0; i < 30; i++) {
     mainLevel.addEntity(platform);
 }
 
+
+
 initInput('a', 'd', 'w', 'q');
 console.log(keys);
 
@@ -89,7 +91,7 @@ function gameLoop(currentTime) {
     const deltaTime = currentTime - lastTime;
     lastTime = currentTime;
     camera.update();
-
+    console.log(player.position.x)
     if (!isPaused) {
         update(deltaTime);
         renderFPS(deltaTime);

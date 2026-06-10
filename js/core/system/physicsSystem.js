@@ -1,4 +1,6 @@
 import { platforms } from "../../core/entities/platforms.js";
+import { playAnimation } from "../components/animation.js";
+import { playSound } from "../helpers/sound.js";
 
 export let GRAVITY = 1700;
 export let GROUND = 1200;
@@ -10,32 +12,49 @@ export function setGroundY(value) {
 }
 
 export function gravity(entities, dt) {
-  entities.forEach((entity) => {
-    if (
-      !entity.components ||
-      !entity.components.physics ||
-      !entity.components.physics.gravity
-    ) {
-      return;
-    }
-    const physics = entity.components.physics.gravity;
+    entities.forEach((entity) => {
 
-    physics.vy += GRAVITY * dt;
+        if (
+            !entity.components ||
+            !entity.components.physics ||
+            !entity.components.physics.gravity
+        ) {
+            return;
+        }
 
-    if (physics.vy > MAX_FALL_SPEED) {
-      physics.vy = MAX_FALL_SPEED;
-    }
+        const physics = entity.components.physics.gravity;
 
-    entity.position.y += physics.vy * dt;
+        physics.vy += GRAVITY * dt;
 
-    if (onGround(entity)) {
-      entity.position.y = GROUND - entity.dimensions.height;
-      entity.components.powers.jump.isJumping = false;
-      physics.vy = 0;
-    }
-  });
+        if (physics.vy > MAX_FALL_SPEED) {
+            physics.vy = MAX_FALL_SPEED;
+        }
 
+        entity.position.y += physics.vy * dt;
 
+        const grounded = onGround(entity);
+
+        // Just landed
+        if (
+            grounded &&
+            !entity.components.wasOnGround &&
+            entity.id === "player"
+        ) {
+            playSound(
+                "./assets/soundTrack/player/land_00_asphalt_04.wav"
+            );
+        }
+
+        if (grounded) {
+            entity.position.y =
+                GROUND - entity.dimensions.height;
+
+            entity.components.powers.jump.isJumping = false;
+            physics.vy = 0;
+        }
+
+        entity.components.wasOnGround = grounded;
+    });
 }
 
 export function updatePhysics(entity) {

@@ -6,6 +6,8 @@ import { applyGravity } from "../components/physics.js";
 import { input, keys } from "../system/input.js";
 import { camera } from "../../main.js";
 import { mainLevel } from "../../main.js";
+import { playSound } from "../helpers/sound.js";
+
 export function createPlayer(
     position = { x: 400, y: 400 },
     dimensions = { height: 128, width: 128 },
@@ -39,9 +41,9 @@ export function createPlayer(
     });
 
     addAnimation(player, "fall", {
-        row: 11,
-        startFrame: 4,
-        frameCount: 6,
+        row: 9,
+        startFrame: 1,
+        frameCount: 10,
         fps: 12
     });
 
@@ -60,13 +62,14 @@ export function createPlayer(
 
     player.setUpdate(playerUpdate);
     player.components.direction = 1;
+    player.components.wasOnGround = false;
     player.setScale(0.6);
     return player;
 }
 
 function playerUpdate(entity, dt) {
     let moving = false;
-
+    
     if (input.includes(keys.left)) {
         entity.position.x -= entity.components.powers.speed.speed * dt;
         entity.components.direction = -1;
@@ -82,8 +85,8 @@ function playerUpdate(entity, dt) {
     if (
         input.includes(keys.jump) && !entity.components.powers.jump.isJumping) {
         entity.components.physics.gravity.vy = -entity.components.powers.jump.jumpPower;
-
         entity.components.powers.jump.isJumping = true;
+        playSound("assets/soundTrack/player/jump_dreamblock.wav");
     }
 
     const dashData = entity.components.powers.dash;
@@ -94,6 +97,7 @@ function playerUpdate(entity, dt) {
         !dashData.onCooldown
     ) {
         dash(entity);
+        playSound("assets/soundTrack/player/dash_pink_left.wav");
     }
 
     if (!onGround(entity)) {

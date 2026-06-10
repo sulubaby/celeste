@@ -5,6 +5,8 @@ export class Level {
     #parentElement = document.body;
 
     entities = [];
+    #renderEntities = [];
+
     systems = [];
 
     dimensions = {
@@ -44,6 +46,12 @@ export class Level {
                 `translate(${x}px, ${y}px) scaleX(${entity.components.direction ?? 1})`;
         });
     }
+
+    // getRenderEntities() {
+    //     this.entities.forEach((entity) => {
+    //         if(entity.position.x + 1000)
+    //     });
+    // }
 
     update(dt) {
         this.systems.forEach((system) => system(this.entities, dt));
