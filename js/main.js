@@ -6,6 +6,7 @@ import { animationSystem } from "./core/system/animationSystem.js"
 import { gravity, setGroundY } from "./core/system/physicsSystem.js";
 import { createPlatform, createPlatforms } from "./core/entities/platforms.js";
 import { Camera } from "./core/components/camera.js";
+import { Entity } from "./core/entities/entity.js";
 
 const fpsElement = document.getElementById("fps");
 const timeElement = document.getElementById("time");
@@ -57,21 +58,7 @@ for (let i = 0; i < 50; i++) {
     mainLevel.addEntity(platform);
 }
 
-for (let i = 0; i < 30; i++) {
-    const x = -300 + i * 50;
-
-    const platform = createPlatform(
-        { height: 50, width: 50 },
-        { x: x, y: 400 }
-    );
-
-    platform.setSpriteSheet("./assets/IceTiles/Ice_3_16x16.png");
-    mainLevel.addEntity(platform);
-}
-
-
-
-initInput('a', 'd', 'w', 'q');
+initInput('ArrowLeft', 'ArrowRight', 'ArrowUp', 'w');
 console.log(keys);
 
 mainLevel.mountEntities();
@@ -91,7 +78,6 @@ function gameLoop(currentTime) {
     const deltaTime = currentTime - lastTime;
     lastTime = currentTime;
     camera.update();
-    console.log(player.position.x)
     if (!isPaused) {
         update(deltaTime);
         renderFPS(deltaTime);

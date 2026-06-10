@@ -59,6 +59,12 @@ export function createPlayer(
         frameCount: 3,
         fps: 20
     });
+    addAnimation(player, "fallAfter", {
+        row: 11,
+        startFrame: 4,
+        frameCount: 6,
+        fps: 20
+    });
 
     player.setUpdate(playerUpdate);
     player.components.direction = 1;
@@ -68,25 +74,39 @@ export function createPlayer(
 }
 
 function playerUpdate(entity, dt) {
+
     let moving = false;
-    
+
+    const grounded = onGround(entity);
+
     if (input.includes(keys.left)) {
-        entity.position.x -= entity.components.powers.speed.speed * dt;
+        entity.position.x -=
+            entity.components.powers.speed.speed * dt;
+
         entity.components.direction = -1;
         moving = true;
     }
 
     if (input.includes(keys.right)) {
-        entity.position.x += entity.components.powers.speed.speed * dt;
+        entity.position.x +=
+            entity.components.powers.speed.speed * dt;
+
         entity.components.direction = 1;
         moving = true;
     }
 
     if (
-        input.includes(keys.jump) && !entity.components.powers.jump.isJumping) {
-        entity.components.physics.gravity.vy = -entity.components.powers.jump.jumpPower;
+        input.includes(keys.jump) &&
+        !entity.components.powers.jump.isJumping
+    ) {
+        entity.components.physics.gravity.vy =
+            -entity.components.powers.jump.jumpPower;
+
         entity.components.powers.jump.isJumping = true;
-        playSound("assets/soundTrack/player/jump_dreamblock.wav");
+
+        playSound(
+            "assets/soundTrack/player/jump_dreamblock.wav"
+        );
     }
 
     const dashData = entity.components.powers.dash;
@@ -97,44 +117,85 @@ function playerUpdate(entity, dt) {
         !dashData.onCooldown
     ) {
         dash(entity);
-        playSound("assets/soundTrack/player/dash_pink_left.wav");
+
+        playSound(
+            "assets/soundTrack/player/dash_pink_left.wav"
+        );
     }
 
-    if (!onGround(entity)) {
-        if (entity.components.physics.gravity.vy < 0) {
+    if (!grounded) {
+
+        if (
+            entity.components.physics.gravity.vy < 0
+        ) {
+
             playAnimation(entity, "jump");
-        } else if (entity.components.physics.gravity.vy > 0) {
-            playAnimation(entity, "fall");
-        } else if(entity.components.powers.jump.isJumping == false && entity.components.physics.gravity.vy >= 0) {
-            playAnimation(entity, "squeeze")
+
+        } else {
+
+            entity.components.physics.gravity.airTime += dt;
+
+            if (
+                entity.components.physics.gravity.airTime < 0.1
+            ) {
+
+                playAnimation(entity, "fallAfter");
+
+            } else {
+
+                playAnimation(entity, "fall");
+
+            }
         }
-    } else if (moving) {
-        playAnimation(entity, "run")
+
     } else {
-        playAnimation(entity, "idle")
+
+        entity.components.physics.gravity.airTime = 0;
+
+        if (!entity.components.wasOnGround) {
+
+            playAnimation(entity, "squeez");
+
+        } else if (moving) {
+
+            playAnimation(entity, "run");
+
+        } else {
+
+            playAnimation(entity, "idle");
+
+        }
     }
 
+    entity.components.wasOnGround = grounded;
 
     const animation = entity.components.animation;
 
     if (!animation) return;
 
     const sprite =
-        animation.sprites[animation.state.sprite];
+        animation.sprites[
+            animation.state.sprite
+        ];
 
     if (!sprite) return;
 
     const frame =
-        sprite.startFrame + animation.state.frame;
+        sprite.startFrame +
+        animation.state.frame;
 
-    const frameWidth = entity.dimensions.width;
-    const frameHeight = entity.dimensions.height;
+    const frameWidth =
+        entity.dimensions.width;
+
+    const frameHeight =
+        entity.dimensions.height;
 
     entity.elem.style.backgroundPosition =
         `-${frame * frameWidth}px -${sprite.row * frameHeight}px`;
 }
 
 function dash(player) {
+
     const dash = player.components.powers.dash;
     const maxDistance = 250;
 
@@ -148,12 +209,10 @@ function dash(player) {
     if (input.includes(keys.right)) dx = 1;
     if (input.includes(keys.jump)) dy = -1;
 
-    // No direction pressed → dash in facing direction
     if (dx === 0 && dy === 0) {
         dx = player.components.direction;
     }
 
-    // Normalize diagonal dashes
     const length = Math.hypot(dx, dy);
 
     if (length > 0) {
@@ -204,7 +263,7 @@ function createGhost(entity, spriteSheet) {
     ghost.setSpriteSheet(spriteSheet);
 
     ghost.components.direction = entity.components.direction;
-    
+
     mainLevel.addEntity(ghost);
     mainLevel.mountEntities();
 
@@ -213,7 +272,7 @@ function createGhost(entity, spriteSheet) {
 
     ghost.elem.style.backgroundSize =
         entity.elem.style.backgroundSize;
-    
+
     ghost.elem.style.opacity = "0.7";
     ghost.elem.style.filter =
         "brightness(2) hue-rotate(180deg)";

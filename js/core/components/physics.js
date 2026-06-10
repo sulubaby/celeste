@@ -13,5 +13,10 @@ export function applyGravity(entity, data = {
         entity.components.physics = {};
     }
 
-    entity.components.physics.gravity = data;
+    entity.components.physics.gravity = {
+        vy: data.vy,
+        isGround: data.isGround,
+        isJumping: data.isJumping,
+        airTime: 0
+    };
 }
