@@ -43,7 +43,6 @@ export class Entity {
         this.elem.style.imageRendering = "pixelated";
         this.elem.style.overflow = "hidden";
         this.elem.style.backgroundSize = "auto";
-        this.elem.style.willChange = "transform";
 
         this.elem.id = this.id;
     }

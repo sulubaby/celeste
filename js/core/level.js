@@ -5,6 +5,8 @@ export class Level {
     #parentElement = document.body;
 
     entities = [];
+    moveableEntities = [];
+    
     #renderEntities = [];
 
     systems = [];

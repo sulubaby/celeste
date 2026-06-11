@@ -70,6 +70,8 @@ export function createPlayer(
     player.components.direction = 1;
     player.components.wasOnGround = false;
     player.setScale(0.6);
+    player.elem.style.willChange = "transform";
+
     return player;
 }
 
@@ -175,7 +177,7 @@ function playerUpdate(entity, dt) {
 
     const sprite =
         animation.sprites[
-            animation.state.sprite
+        animation.state.sprite
         ];
 
     if (!sprite) return;

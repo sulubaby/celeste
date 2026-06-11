@@ -57,9 +57,15 @@ export function gravity(entities, dt) {
     });
 }
 
-export function updatePhysics(entity) {
+export function updatePhysics(moveableEntities = [], entities = []) {
   // Platform collision (includes ground)
+  moveableEntities.forEach((moveableEntity) => {
+      entities.forEach((entity) => {
+
+      });
+  });
   platforms.forEach((platform) => {
+
     const playerBottom = entity.position.y + entity.dimensions.height;
     const playerRight = entity.position.x + entity.dimensions.width;
     const playerLeft = entity.position.x;
@@ -69,7 +75,7 @@ export function updatePhysics(entity) {
 
     const nowBelowPlatform = playerBottom >= platform.y;
     // Checks if the player's bottom has now reached or passed the platform's top (potential landing)
-
+    
     const horizontalOverlap =
       playerRight > platform.x && playerLeft < platform.x + platform.width;
 

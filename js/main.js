@@ -11,14 +11,14 @@ import { Entity } from "./core/entities/entity.js";
 const fpsElement = document.getElementById("fps");
 const timeElement = document.getElementById("time");
 const pauseMenu = document.getElementById("pause-menu");
-export const gameContainer = document.getElementById('game');
+export const gameContainer = document.getElementById('platform-layer');
 
 let isPaused = false;
 let lastTime = performance.now();
 let gameTime = 0;
 
 //createEnvironment();
-const game = document.getElementById("game");
+const game = document.getElementById("platform-layer");
 
 export const mainLevel = new Level(
     { height: 800, width: 5000 }
