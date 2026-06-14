@@ -21,7 +21,7 @@ let gameTime = 0;
 const game = document.getElementById("platform-layer");
 
 export const mainLevel = new Level(
-    { height: 800, width: 5000 }
+    { height: 550, width: 5000 }
 );
 
 setGroundY(mainLevel.dimensions.height);
@@ -51,7 +51,7 @@ for (let i = 0; i < 50; i++) {
 
     const platform = createPlatform(
         { height: 50, width: 50 },
-        { x: x, y: 564 }
+        { x: x, y: 650 }
     );
 
     platform.setSpriteSheet("./assets/IceTiles/Ice_3_16x16.png");

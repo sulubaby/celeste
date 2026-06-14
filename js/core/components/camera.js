@@ -8,8 +8,8 @@ export class Camera {
     update() {
         if (!this.target) return;
 
-        const halfW = window.innerWidth / 2;
-        const halfH = window.innerHeight / 2;
+        const halfW = 1200 / 2;
+        const halfH = 550 / 2;
 
         let x = this.target.position.x - halfW;
         let y = this.target.position.y - halfH;

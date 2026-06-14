@@ -34,9 +34,9 @@ body {
 #game {
   position: relative;
 
-  width: min(1400px, 90vw);
-  height: 90%;
-
+  width: 1200px;
+  height: 550px;
+  
   overflow: hidden;
 
   border-radius: 20px;
