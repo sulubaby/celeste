@@ -1,88 +1,51 @@
-import { createEnvironment } from "./environments/environment.js";
-import { initInput, keys } from "./core/system/input.js";
-import { createPlayer } from "./core/entities/player.js";
-import { Level } from "./core/level.js";
-import { animationSystem } from "./core/system/animationSystem.js"
-import { gravity, setGroundY } from "./core/system/physicsSystem.js";
-import { createPlatform, createPlatforms } from "./core/entities/platforms.js";
-import { Camera } from "./core/components/camera.js";
-import { Entity } from "./core/entities/entity.js";
+import { createBird } from "./entities/bird.js";
+import { Entity } from "./entities/entity.js";
+import { createPlayer } from "./entities/player.js";
+import { createSnow } from "./helpers/snow.js";
+import { Level } from "./level.js";
+import { createTutorial } from "./levels/tutorial.js";
+import { Camera } from "./systems/camera.js";
+import { initInputs } from "./systems/input.js";
+import { collision, gravity } from "./systems/physics.js";
 
-const fpsElement = document.getElementById("fps");
-const timeElement = document.getElementById("time");
-const pauseMenu = document.getElementById("pause-menu");
-export const gameContainer = document.getElementById('platform-layer');
+export const gameContainer = document.getElementById('game');
+export const player = createPlayer({
 
-let isPaused = false;
-let lastTime = performance.now();
-let gameTime = 0;
+    x: 4420,
+    y: 200
 
-//createEnvironment();
-const game = document.getElementById("platform-layer");
+}, {
+    height: 64,
+    width: 64
+}, "./assets/player3.png");
 
-export const mainLevel = new Level(
-    { height: 550, width: 5000 }
-);
+export const bird = createBird();
 
-setGroundY(mainLevel.dimensions.height);
+export let mainLevel;
 
-mainLevel.setParent(game);
-mainLevel.addSystem(gravity);
-
-export const player = createPlayer(
-    { x: 0, y: 0 },
-    { height: 128, width: 128 },
-    "./assets/player.png"
-);
-
-player.components.animation.state.sprite = "idle";
-mainLevel.addEntity(player);
-mainLevel.addSystem(animationSystem);
-player.components.powers.jump.isJumping = false;
-console.log(player);
-
-
-// camera
-export const camera = new Camera(player);
-
-// create platform
-for (let i = 0; i < 50; i++) {
-    const x = -300 + i * 50;
-
-    const platform = createPlatform(
-        { height: 50, width: 50 },
-        { x: x, y: 650 }
-    );
-
-    platform.setSpriteSheet("./assets/IceTiles/Ice_3_16x16.png");
-    mainLevel.addEntity(platform);
-}
-
-initInput('ArrowLeft', 'ArrowRight', 'ArrowUp', 'w');
-console.log(keys);
-
+mainLevel = await createTutorial();
 mainLevel.mountEntities();
 
-function update(deltaTime) {
-    const dt = deltaTime / 1000;
-    gameTime += dt;
-    mainLevel.update(dt);
-    timeElement.textContent = Math.floor(gameTime);
-}
+console.log(bird)
 
-function renderFPS(deltaTime) {
-    fpsElement.textContent = Math.round(1000 / deltaTime);
-}
+export const camera = new Camera(player);
 
+initInputs();
+
+const snow = createSnow(gameContainer);
+
+let lastTime = performance.now();
+
+console.log(player);
 function gameLoop(currentTime) {
-    const deltaTime = currentTime - lastTime;
+    let dt = (currentTime - lastTime) / 1000;
     lastTime = currentTime;
-    camera.update();
-    if (!isPaused) {
-        update(deltaTime);
-        renderFPS(deltaTime);
-    }
 
+    if (dt > 0.1) dt = 0.1;
+    mainLevel.update(dt);
+    camera.update();
+    snow.update(dt);
     requestAnimationFrame(gameLoop);
 }
+
 requestAnimationFrame(gameLoop);

@@ -1,0 +1,230 @@
+import { playSound } from "../helpers/sound.js";
+
+let first = true;
+
+
+export function collision(entityA, entities = []) {
+    if (entityA.components.physics?.gravity) {
+        entityA.components.physics.gravity.isGround = false;
+    }
+
+    entities.forEach((entityB) => {
+        if (entityA.position.x - 300 >= entityB.position.x || entityA.position.x + 300 <= entityB.position.x) {
+            return;
+        }
+        if (entityB.elem.classList.contains("none-collision")) {
+            return;
+        }
+        if (entityA.elem.classList.contains("none-collision")) {
+            return;
+        }
+        const overlapX = getOverlapX(entityA, entityB);
+        const overlapY = getOverlapY(entityA, entityB);
+
+
+        if (overlapX <= 0 || overlapY <= 0) {
+            return;
+        }
+
+        if (overlapX < overlapY) {
+            resolveX(entityA, entityB);
+        } else if (overlapX >= overlapY) {
+            resolveY(entityA, entityB);
+
+        }
+    });
+}
+
+function getOffSet(entity) {
+    return entity.offSet || { top: 0, right: 0, left: 0, bottom: 0 };
+}
+
+export function getBounds(entity) {
+    const offSet = getOffSet(entity);
+
+    return {
+        left: entity.position.x + offSet.left,
+        right: entity.position.x + entity.dimensions.width - offSet.right,
+        top: entity.position.y + offSet.top,
+        bottom: entity.position.y + entity.dimensions.height - offSet.bottom
+    };
+}
+
+function getOverlapX(entityA, entityB) {
+    const a = getBounds(entityA);
+    const b = getBounds(entityB);
+
+    return Math.min(a.right, b.right) - Math.max(a.left, b.left);
+}
+
+function getOverlapY(entityA, entityB) {
+    const a = getBounds(entityA);
+    const b = getBounds(entityB);
+
+    return Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+}
+
+function resolveX(entityA, entityB) {
+    const a = getBounds(entityA);
+    const b = getBounds(entityB);
+
+    if (a.left < b.left) {
+        left(entityA, entityB);
+
+    } else if (a.left > b.left) {
+        right(entityA, entityB);
+    }
+}
+
+function resolveY(entityA, entityB) {
+    const a = getBounds(entityA);
+    const b = getBounds(entityB);
+
+    if (a.top < b.top) {
+        top(entityA, entityB);
+    } else {
+        bottom(entityA, entityB);
+    }
+}
+
+function stopDash(entity) {
+    if (entity.components.powers?.dash) {
+        entity.components.powers.dash.distanceTravelled = 100000;
+    }
+}
+
+function left(entityA, entityB) {
+    const offSetA = getOffSet(entityA);
+    const boundsB = getBounds(entityB);
+
+    entityA.position.x = boundsB.left - entityA.dimensions.width + offSetA.right;
+
+    stopDash(entityA);
+}
+
+function right(entityA, entityB) {
+    const offSetA = getOffSet(entityA);
+    const boundsB = getBounds(entityB);
+
+
+    entityA.position.x = boundsB.right - offSetA.left;
+
+    stopDash(entityA);
+}
+
+function top(entityA, entityB) {
+    const offSetA = getOffSet(entityA);
+    const boundsB = getBounds(entityB);
+
+    entityA.position.y = boundsB.top - entityA.dimensions.height + offSetA.bottom;
+
+    if (entityA.components.physics?.gravity) {
+        entityA.components.physics.gravity.isGround = true;
+        if (entityA.components.physics.gravity.vy > 100) {
+            playSound(
+                "assets/soundTrack/player/land_00_asphalt_04.wav"
+            );
+        }
+        entityA.components.physics.gravity.vy = 0;
+    }
+
+    if (entityA.components.powers?.jump) {
+        entityA.components.powers.jump.isJumping = false;
+    }
+
+    stopDash(entityA);
+}
+
+function bottom(entityA, entityB) {
+    const offSetA = getOffSet(entityA);
+    const boundsB = getBounds(entityB);
+
+    entityA.position.y = boundsB.bottom - offSetA.top;
+
+    stopDash(entityA);
+}
+
+export function gravity(entities = [], dt) {
+    entities.forEach((entity) => {
+        if (
+            !entity.components ||
+            !entity.components.physics ||
+            !entity.components.physics.gravity
+        ) {
+            return;
+        }
+
+        if (entity.components.physics.gravity.isGround) return;
+
+        entity.components.physics.gravity.vy += entity.components.physics.gravity.gravityForce * dt;
+    });
+}
+
+export function isTouchingRightWall(player, entities) {
+    const a = getBounds(player);
+
+    for (const entity of entities) {
+        if (entity.elem.classList.contains("none-collision")) {
+            continue;
+        }
+        if (player.elem.classList.contains("none-collision")) {
+            continue;
+        }
+
+        if (entity.id === player.id) continue;
+
+        const b = getBounds(entity);
+
+        const touching =
+            Math.abs(a.right - b.left) <= 2 &&
+            a.bottom > b.top &&
+            a.top < b.bottom;
+
+        if (touching) {
+            if (player.components.physics.collision) {
+                player.components.physics.collision.right = true;
+            }
+            return true;
+        }
+    }
+    if (player.components.physics.collision) {
+        player.components.physics.collision.right = false;
+    }
+    return false;
+}
+
+export function isTouchingLeftWall(player, entities) {
+    const a = getBounds(player);
+
+    for (const entity of entities) {
+        if (entity.elem.classList.contains("none-collision")) {
+            continue;
+        }
+
+        if (player.elem.classList.contains("none-collision")) {
+            continue;
+        }
+
+        if (entity.id === player.id) continue;
+
+        const b = getBounds(entity);
+
+        const touching =
+            Math.abs(a.left - b.right) <= 2 &&
+            a.bottom > b.top &&
+            a.top < b.bottom;
+
+        if (touching) {
+            if (player.components.physics.collision) {
+                player.components.physics.collision.left = true;
+            }
+            return true;
+        }
+    }
+
+    if (player.components.physics.collision) {
+        player.components.physics.collision.left = false;
+    }
+
+    return false;
+}
