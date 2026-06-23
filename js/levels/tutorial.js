@@ -63,9 +63,11 @@ export async function createTutorial() {
         });
     });
     level.addEntity(player);
-    const grany = new Entity({ x: 4080, y: 100 }, { height: 80, width: 66.6 });
+    const grany = new Entity({ x: 4080, y: 200 }, { height: 80, width: 66.6 });
     grany.setSpriteSheet("./assets/tiles/grany.png");
     grany.setUpdate(granyUpdate);
+    grany.elem.classList.add('none-collision');
+    grany.elem.style.scale = '1.2';
     addAnimation(grany, "idle", {
         row: 0,
         frameCount: 7,

@@ -11,7 +11,7 @@ import { collision, gravity } from "./systems/physics.js";
 export const gameContainer = document.getElementById('game');
 
 export const player = createPlayer({
-    x: 0,
+    x: 4090,
     y: 100
 
 }, {
