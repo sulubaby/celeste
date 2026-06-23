@@ -29,7 +29,7 @@ export function createPlayer(
     addMovement(player, 350);
     applyGravity(player, 1000);
     addJump(player, 400);
-    addDashing(player, 3);
+    addDashing(player, 100);
     addOffSet(player, {
         top: 5,
         right: 10,
@@ -84,6 +84,7 @@ export function createPlayer(
 }
 
 export function playerUpdate(player, dt) {
+    if(player.freeze) return;
     if (!player.alive) {
         playerDeath(dt);
         return;
@@ -132,7 +133,6 @@ export function playerUpdate(player, dt) {
 
     }
 
-    // console.log(player.components.physics.gravity.vy)
     const dashData = player.components.powers.dash;
     if (
         inputs.includes(keys.dash) &&
@@ -145,10 +145,9 @@ export function playerUpdate(player, dt) {
         );
     }
 
-
     player.position.y += player.components.physics.gravity.vy * dt;
-    if ((player.components.physics.gravity.vy <= -200) ||
-        (player.components.physics.gravity.vy >= 30)) {
+    if ((player.components.physics.gravity.vy <= -300) ||
+        (player.components.physics.gravity.vy >= 50)) {
         if (
             player.components.physics.gravity.vy < 0
         ) {
@@ -157,19 +156,19 @@ export function playerUpdate(player, dt) {
             playAnimation(player, "fall");
         }
     } else {
-    if (moving) {
-        if (player.components.physics.collision.right || player.components.physics.collision.left) {
-            playAnimation(player, "climb");
+        if (moving) {
+            if (player.components.physics.collision.right || player.components.physics.collision.left) {
+                playAnimation(player, "climb");
+            } else {
+                playAnimation(player, "run");
+            }
         } else {
-            playAnimation(player, "run");
+            playAnimation(player, "idle");
         }
-    } else {
-        playAnimation(player, "idle");
+
     }
 
-}
-
-renderSprite(player);
+    renderSprite(player);
 }
 
 function renderSprite(player) {
@@ -185,6 +184,18 @@ function renderSprite(player) {
 
     player.elem.style.backgroundPosition =
         `-${frame * frameWidth}px -${sprite.row * frameHeight}px`;
+}
+
+export function playerDeath(dt) {
+    renderSprite(player)
+    window.removeEventListener('keydown', detectInput)
+    window.removeEventListener('keyup', removeKey);
+    inputs.length = 0;
+
+    playAnimation(player, "death");
+
+    player.position.y -= 350 * dt;
+
 }
 
 function dash(player, dt) {
@@ -218,9 +229,8 @@ function dash(player, dt) {
     let loop;
 
     function perform() {
-
-        createGhost(player, "./assets/player3.png");
-
+        player.components.physics.gravity.vy = 0;
+        createGhost(player, "./assets/player3.png")
         const step = dash.dashPower;
 
         player.position.x += dx * step;
@@ -244,16 +254,4 @@ function dash(player, dt) {
 
     window.addEventListener('keydown', detectInput);
     window.addEventListener('keyup', removeKey);
-}
-
-export function playerDeath(dt) {
-    renderSprite(player)
-    window.removeEventListener('keydown', detectInput)
-    window.removeEventListener('keyup', removeKey);
-    inputs.length = 0;
-
-    playAnimation(player, "death");
-
-    player.position.y -= 350 * dt;
-
 }

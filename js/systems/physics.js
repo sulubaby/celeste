@@ -3,7 +3,7 @@ import { playSound } from "../helpers/sound.js";
 let first = true;
 
 
-export function collision(entityA, entities = []) {
+export function collision(entityA, entities = [], dt) {
     if (entityA.components.physics?.gravity) {
         entityA.components.physics.gravity.isGround = false;
     }
@@ -18,6 +18,10 @@ export function collision(entityA, entities = []) {
         if (entityA.elem.classList.contains("none-collision")) {
             return;
         }
+        if (entityB.elem.classList.contains("falling")) {
+            entityB.position.y += 400 * dt;
+            return;
+        }
         const overlapX = getOverlapX(entityA, entityB);
         const overlapY = getOverlapY(entityA, entityB);
 
@@ -25,12 +29,17 @@ export function collision(entityA, entities = []) {
         if (overlapX <= 0 || overlapY <= 0) {
             return;
         }
+        if (entityB.elem.classList.contains("fall")) {
+            if (!entityB.elem.classList.contains("falling")) {
+                playSound("./assets/soundTrack/breakBridge.wav");
+                entityB.elem.classList.add("falling");
+            }
+        }
 
         if (overlapX < overlapY) {
             resolveX(entityA, entityB);
         } else if (overlapX >= overlapY) {
             resolveY(entityA, entityB);
-
         }
     });
 }
@@ -41,7 +50,6 @@ function getOffSet(entity) {
 
 export function getBounds(entity) {
     const offSet = getOffSet(entity);
-
     return {
         left: entity.position.x + offSet.left,
         right: entity.position.x + entity.dimensions.width - offSet.right,
@@ -87,11 +95,11 @@ function resolveY(entityA, entityB) {
     }
 }
 
-function stopDash(entity) {
-    if (entity.components.powers?.dash) {
-        entity.components.powers.dash.distanceTravelled = 100000;
-    }
-}
+// function stopDash(entity) {
+//     if (entity.components.powers?.dash) {
+//         entity.components.powers.dash.distanceTravelled = 100000;
+//     }
+// }
 
 function left(entityA, entityB) {
     const offSetA = getOffSet(entityA);
@@ -99,7 +107,7 @@ function left(entityA, entityB) {
 
     entityA.position.x = boundsB.left - entityA.dimensions.width + offSetA.right;
 
-    stopDash(entityA);
+    // stopDash(entityA);
 }
 
 function right(entityA, entityB) {
@@ -109,7 +117,7 @@ function right(entityA, entityB) {
 
     entityA.position.x = boundsB.right - offSetA.left;
 
-    stopDash(entityA);
+    // stopDash(entityA);
 }
 
 function top(entityA, entityB) {
@@ -130,9 +138,11 @@ function top(entityA, entityB) {
 
     if (entityA.components.powers?.jump) {
         entityA.components.powers.jump.isJumping = false;
+        entityA.components.powers.jump.doubleJump = false;
+
     }
 
-    stopDash(entityA);
+    // stopDash(entityA);
 }
 
 function bottom(entityA, entityB) {
@@ -141,7 +151,7 @@ function bottom(entityA, entityB) {
 
     entityA.position.y = boundsB.bottom - offSetA.top;
 
-    stopDash(entityA);
+    // stopDash(entityA);
 }
 
 export function gravity(entities = [], dt) {
@@ -149,7 +159,8 @@ export function gravity(entities = [], dt) {
         if (
             !entity.components ||
             !entity.components.physics ||
-            !entity.components.physics.gravity
+            !entity.components.physics.gravity ||
+            entity.freeze
         ) {
             return;
         }

@@ -1,6 +1,7 @@
 export class Entity {
     id = "";    
 
+    freeze = false;
     alive = true;
     position = {
         x: 0,

@@ -58,78 +58,61 @@ body {
   background-size: cover;
 }
 
-.hidden {
-  display: none;
-}
-
-#pause-menu {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-
+.title-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-
-  background: rgba(0, 0, 0, 0.65);
-}
-
-#pause-menu.hidden {
-  display: none;
-}
-
-.pause-box {
-  width: 320px;
-  padding: 30px;
-
-  background: #1b1d2b;
-  border: 2px solid #ffd166;
-  border-radius: 16px;
-
-  text-align: center;
-  color: white;
-}
-
-.pause-box h1 {
-  margin-bottom: 25px;
-  font-size: 2rem;
-}
-
-.pause-box button {
-  display: block;
+  justify-content: center;
   width: 100%;
-
-  margin: 12px 0;
-  padding: 12px;
-
-  border: none;
-  border-radius: 10px;
-
-  font-size: 1rem;
-  cursor: pointer;
-
-  background: #ffd166;
-  color: #1b1d2b;
-  font-weight: bold;
+  height: 100%;
+  /* or whatever your container's size is */
 }
 
-.pause-box button:hover {
-  transform: scale(1.04);
-}
-
-#win-screen {
-  position: fixed;
-  inset: 0;
-
+.title {
   display: flex;
   justify-content: center;
-  align-items: center;
-
-  background: rgba(0, 0, 0, 0.75);
-
-  z-index: 1000;
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  user-select: none;
 }
 
-#win-screen.hidden {
-  display: none;
+.title .letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(18px) scale(0.85);
+  filter: blur(4px);
+  animation: letterIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  background: linear-gradient(180deg, #bfe6ff 0%, #4fa8ff 60%, #1f6fe0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.title .space {
+  width: 0.3em;
+}
+
+@keyframes letterIn {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.title.done .letter {
+  animation: letterIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    glow 2.4s ease-in-out 0.4s infinite;
+}
+
+@keyframes glow {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 10px rgba(70, 160, 255, 0.55));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 22px rgba(70, 160, 255, 0.95));
+  }
 }

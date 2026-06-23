@@ -27,7 +27,7 @@ export function showSign(src, x, y, parentContainer = document.body) {
         sign.style.transform = "translateY(0) scale(1)";
     });
 
-    return sign; 
+    return sign;
 }
 
 export function hideSign(sign) {
@@ -38,4 +38,21 @@ export function hideSign(sign) {
         sign.remove();
     }, { once: true });
 }
+
+export function revealTitle(el, text, options = {}) {
+    const { delayBetween = 150, startDelay = 0 } = options;
+
+    el.innerHTML = '';
+    el.classList.remove('done');
+
+    const chars = text.split('');
+    chars.forEach((ch, i) => {
+        const span = document.createElement('span');
+        span.className = 'letter' + (ch === ' ' ? ' space' : '');
+        span.textContent = ch === ' ' ? '\u00A0' : ch;
+        span.style.animationDelay = `${startDelay + i * delayBetween}ms`;
+        el.appendChild(span);
+    });
+}
+
 

@@ -22,7 +22,8 @@ export function addJump(entity, jumpPow) {
 
     entity.components.powers.jump = {
         jumpPower: jumpPow,
-        isJumping: false
+        isJumping: false,
+        doubleJump: false
     }
 }
 
@@ -39,4 +40,19 @@ export function addDashing(entity, dashPower = 30) {
         distanceTravelled: 0,
         onCooldown: false
     }
+}
+
+export function addBost(entity, boostPower = 5) {
+    if (!entity.components.powers) {
+        entity.components.powers = {};
+    }
+
+    if (entity.components.powers.boost) return;
+
+    entity.components.powers.boost = {
+        isBoost: false,
+        boostPower,
+        boostDistance: 0,
+        onCooldown: false
+    };
 }

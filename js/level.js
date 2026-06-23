@@ -5,7 +5,7 @@ import { Camera } from "./systems/camera.js";
 
 export class Level {
     parent;
-
+    end = false;
     dimensions = {
         height: 0,
         width: 0
@@ -88,7 +88,7 @@ export class Level {
     update(dt) {
         this.conditions(dt);
         if (player.alive) {
-            collision(player, this.entities.filter((entity) => entity !== player));
+            collision(player, this.entities.filter((entity) => entity !== player), dt);
         }
 
         this.entities.forEach((entity) => {
