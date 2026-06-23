@@ -29,3 +29,16 @@ export function resumeGame() {
   gameState.totalPauseTime += Date.now() - gameState.pauseStartTime;
   pauseMenu.classList.add("hidden");
 }
+
+function restartGame() {
+  location.reload();
+}
+
+for (let i = 0; i < restartBtn.length; i++) {
+  restartBtn[i].addEventListener("click", restartGame);
+}
+
+continueBtn.addEventListener("click", (e) => {
+  resumeGame();
+  console.log(gameState.isPaused);
+});
