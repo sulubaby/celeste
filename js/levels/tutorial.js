@@ -9,7 +9,8 @@ import { playSound } from "../helpers/sound.js";
 import { hideSign, revealTitle, showSign } from "../helpers/sign.js";
 import { applyGravity } from "../components/physics.js";
 import { playerDeath } from "../entities/player.js";
-import { inputs, keys } from "../systems/input.js";
+import { detectInput, inputs, keys, removeKey } from "../systems/input.js";
+import { showDialogue } from "../helpers/scene.js";
 
 const fallingBlocks = createFallingBlock();
 let level;
@@ -19,6 +20,8 @@ let soundTriggered = false;
 let death = false;
 let breakTrapTriggered = false;
 let birdLanded = false;
+export let grannyConvo = false;
+export let granyConvoEnd = false;
 
 let dashTutorial = false;
 let positionX = 0;
@@ -63,7 +66,7 @@ export async function createTutorial() {
         });
     });
     level.addEntity(player);
-    const grany = new Entity({ x: 4080, y: 200 }, { height: 80, width: 66.6 });
+    const grany = new Entity({ x: 4300, y: 200 }, { height: 80, width: 66.6 });
     grany.setSpriteSheet("./assets/tiles/grany.png");
     grany.setUpdate(granyUpdate);
     grany.elem.classList.add('none-collision');
@@ -84,7 +87,7 @@ export async function createTutorial() {
     return level;
 }
 
-function conditions(dt) {
+async function conditions(dt) {
     // falling snow blocks
     if ((player.position.x >= 1100 || triggered)) {
         triggered = true;
@@ -143,7 +146,6 @@ function conditions(dt) {
     }
     //7009 = x, y = 271
     if (dashTutorial && inputs.includes(keys.dash)) {
-
         player.freeze = false;
     }
 
@@ -165,6 +167,95 @@ function conditions(dt) {
         loop = setInterval(cameraMovement, 40);
     }
 
+    if (player.position.x >= 4090 && !grannyConvo && !granyConvoEnd) {
+        playAnimation(player, "talk");
+        window.removeEventListener('keydown', detectInput);
+        window.removeEventListener('keyup', removeKey);
+        inputs.length = 0;
+        grannyConvo = true;
+
+        await showDialogue(
+            "Excuse me, ma'am?",
+            "./assets/faces/madline.png",
+            "./assets/soundTrack/player/talk1.wav"
+        );
+
+
+        await (async () => {
+            inputs.push('ArrowRight');
+            setTimeout(() => {
+                inputs.length = 0;
+                playAnimation(player, "talk");
+            }, 500);
+        })();
+
+        await showDialogue(
+            "The sign out front is busted...\nis this the Mountain trail?",
+            "./assets/faces/madline.png",
+            "./assets/soundTrack/player/talk2.wav"
+        );
+
+        await showDialogue(
+            "You are almost there.\nIt's across the bridge.",
+            "./assets/faces/grany.png",
+            "./assets/soundTrack/grany/talk1.wav"
+        );
+
+        await (async () => {
+            inputs.push('ArrowRight');
+            setTimeout(() => {
+                inputs.length = 0;
+                playAnimation(player, "talk");
+                player.components.movement.direction = -1;
+            }, 900);
+        })();
+
+        await showDialogue(
+            "By The Way. You should call someone about your\ndriveWay. The ridge collapsed and I nearly died.",
+            "./assets/faces/madlineSad.png",
+            "./assets/soundTrack/player/talk3.wav"
+        );
+
+        await showDialogue(
+            "Ha..HA...HA.HA",
+            "./assets/faces/granyLaugh.png",
+            "./assets/soundTrack/grany/laugh.wav"
+        );
+
+        await showDialogue(
+            "if my driveway almost did you in,\nthe mountain might be a bit too much for you.",
+            "./assets/faces/granyLaugh.png",
+            "./assets/soundTrack/grany/talk1.wav"
+        );
+
+        await showDialogue(
+            "well, if an old bat like you survive out here, I think I'll be fine.",
+            "./assets/faces/madlineMad.png",
+            "./assets/soundTrack/player/talk2.wav"
+        );
+
+        await showDialogue(
+            "but you should know,\nCeleste mountains is a strange place.",
+            "./assets/faces/grany.png",
+            "./assets/soundTrack/grany/talk2.wav"
+        );
+
+        await showDialogue(
+            "Ha..HA...HA.HA",
+            "./assets/faces/granyLaugh.png",
+            "./assets/soundTrack/grany/laugh.wav"
+        );
+
+        await showDialogue(
+            "......",
+            "./assets/faces/madlineMad.png"
+        );
+
+        inputs.length = 0;
+        granyConvoEnd = true;
+        window.addEventListener('keydown', detectInput);
+        window.addEventListener('keyup', removeKey);
+    }
 }
 
 function createFallingBlock() {

@@ -5,7 +5,7 @@ import { detectInput, inputs, keys, removeKey } from "../systems/input.js";
 import { Entity } from "./entity.js";
 import { createGhost } from "./ghost.js";
 import { playSound } from "../helpers/sound.js"
-import { birdSounded } from "../levels/tutorial.js";
+import { birdSounded, grannyConvo, granyConvoEnd } from "../levels/tutorial.js";
 import { bird, mainLevel, player } from "../main.js";
 import { getBounds, isTouchingLeftWall, isTouchingRightWall } from "../systems/physics.js";
 import { hideSign, showSign } from "../helpers/sign.js";
@@ -80,11 +80,18 @@ export function createPlayer(
         fps: 12
     });
 
+    addAnimation(player, "talk", {
+        row: 8,
+        startFrame: 0,
+        frameCount: 2,
+        fps: 8
+    });
+
     return player;
 }
 
 export function playerUpdate(player, dt) {
-    if(player.freeze) return;
+    if (player.freeze) return;
     if (!player.alive) {
         playerDeath(dt);
         return;
@@ -144,7 +151,7 @@ export function playerUpdate(player, dt) {
             "assets/soundTrack/player/dash_pink_left.wav"
         );
     }
-
+    renderSprite(player);
     player.position.y += player.components.physics.gravity.vy * dt;
     if ((player.components.physics.gravity.vy <= -300) ||
         (player.components.physics.gravity.vy >= 50)) {
@@ -163,12 +170,13 @@ export function playerUpdate(player, dt) {
                 playAnimation(player, "run");
             }
         } else {
+            if (grannyConvo && !granyConvoEnd) return;
             playAnimation(player, "idle");
         }
 
     }
 
-    renderSprite(player);
+
 }
 
 function renderSprite(player) {

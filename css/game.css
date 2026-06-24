@@ -116,3 +116,152 @@ body {
     filter: drop-shadow(0 0 22px rgba(70, 160, 255, 0.95));
   }
 }
+
+.hidden {
+  display: none;
+}
+
+#pause-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(0, 0, 0, 0.65);
+}
+
+#pause-menu.hidden {
+  display: none;
+}
+
+.pause-box {
+  width: 320px;
+  padding: 30px;
+
+  background: #1b1d2b;
+  border: 2px solid #ffd166;
+  border-radius: 16px;
+
+  text-align: center;
+  color: white;
+}
+
+.pause-box h1 {
+  margin-bottom: 25px;
+  font-size: 2rem;
+}
+
+.pause-box button {
+  display: block;
+  width: 100%;
+
+  margin: 12px 0;
+  padding: 12px;
+
+  border: none;
+  border-radius: 10px;
+
+  font-size: 1rem;
+  cursor: pointer;
+
+  background: #ffd166;
+  color: #1b1d2b;
+  font-weight: bold;
+}
+
+.pause-box button:hover {
+  transform: scale(1.04);
+}
+
+#win-screen {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(0, 0, 0, 0.75);
+
+  z-index: 1000;
+}
+
+#win-screen.hidden {
+  display: none;
+}
+
+.dialogue-box {
+  position: fixed;
+  left: 50%;
+  top: 40px;
+  transform: translateX(-50%) translateY(20px);
+
+  width: 900px;
+  max-width: 90vw;
+  min-height: 140px;
+
+  display: flex;
+  align-items: center;
+  gap: 25px;
+
+  padding: 18px 28px;
+
+  background: rgba(25, 15, 25, 0.95);
+  border: 4px solid #3d2d45;
+  border-radius: 12px;
+
+  box-shadow:
+    0 0 0 3px rgba(95, 70, 110, .5) inset,
+    0 12px 30px rgba(0, 0, 0, .6);
+
+  color: white;
+  font-family: Arial, sans-serif;
+
+  opacity: 1;
+  transition:
+    opacity .35s ease,
+    transform .35s ease;
+}
+
+.dialogue-box.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(40px);
+  pointer-events: none;
+}
+
+.portrait {
+  width: 110px;
+  height: 110px;
+
+  object-fit: cover;
+
+  border: 3px solid #5d416d;
+  border-radius: 8px;
+
+  background: #1c1620;
+
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+.dialogue-content {
+  flex: 1;
+  text-align: center;
+}
+
+.dialogue-content h2 {
+  margin: 0 0 12px;
+  font-size: 22px;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.dialogue-content p {
+  margin: 0;
+  font-size: 36px;
+  font-weight: bold;
+  color: #ece7ea;
+}

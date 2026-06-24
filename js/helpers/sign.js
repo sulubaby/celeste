@@ -55,4 +55,12 @@ export function revealTitle(el, text, options = {}) {
     });
 }
 
+const dialogue = document.getElementById("dialogue");
 
+export function showDialogue() {
+    dialogue.classList.remove("hidden");
+}
+
+export function hideDialogue() {
+    dialogue.classList.add("hidden");
+}

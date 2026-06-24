@@ -19,7 +19,6 @@ export class Camera {
 
         let cameraX = chunkStart;
 
-        // Start moving 100px before the next chunk
         if (playerX > chunkEnd - TRANSITION) {
             const t = (playerX - (chunkEnd - TRANSITION)) / TRANSITION;
 
