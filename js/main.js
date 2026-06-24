@@ -50,18 +50,23 @@ const snow = createSnow(gameContainer);
 
 let lastTime = performance.now();
 
+<<<<<<< HEAD
 console.log(player);
 // showDialogue();
 setTimeout(hideDialogue, 1000);
 
+=======
+>>>>>>> ccb6d515540d0b0fb80f943f4e9239a382444d98
 function gameLoop(currentTime) {
-  let dt = (currentTime - lastTime) / 1000;
-  lastTime = currentTime;
+  if (!gameState.isPaused) {
+    let dt = (currentTime - lastTime) / 1000;
+    lastTime = currentTime;
 
-  if (dt > 0.1) dt = 0.1;
-  mainLevel.update(dt);
-  camera.update();
-  snow.update(dt);
+    if (dt > 0.1) dt = 0.1;
+    mainLevel.update(dt);
+    camera.update();
+    snow.update(dt);
+  }
   requestAnimationFrame(gameLoop);
 }
 
