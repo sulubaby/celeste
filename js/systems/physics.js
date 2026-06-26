@@ -1,4 +1,6 @@
 import { playSound } from "../helpers/sound.js";
+import { Level } from "../level.js";
+import { mainLevel } from "../main.js";
 
 let first = true;
 
@@ -12,10 +14,12 @@ export function collision(entityA, entities = [], dt) {
         if (entityA.position.x - 300 >= entityB.position.x || entityA.position.x + 300 <= entityB.position.x) {
             return;
         }
-        if (entityB.elem.classList.contains("none-collision")) {
+
+        if (entityB.elem.classList.contains("none-collision") && !entityB.elem.classList.contains("strawBerry")) {
             return;
         }
-        if (entityA.elem.classList.contains("none-collision")) {
+
+        if (entityA.elem.classList.contains("none-collision") && !entityB.elem.classList.contains("strawBerry")) {
             return;
         }
         if (entityB.elem.classList.contains("falling")) {
@@ -29,6 +33,12 @@ export function collision(entityA, entities = [], dt) {
         if (overlapX <= 0 || overlapY <= 0) {
             return;
         }
+
+        if (entityB.elem.classList.contains("strawBerry")) {
+            playSound("./assets/soundTrack/strawBerry.wav");
+            mainLevel.removeEntity(entityB);
+            return;
+        }
         if (entityB.elem.classList.contains("fall")) {
             if (!entityB.elem.classList.contains("falling")) {
                 playSound("./assets/soundTrack/breakBridge.wav");
@@ -36,11 +46,23 @@ export function collision(entityA, entities = [], dt) {
             }
         }
 
+        if (entityB.elem.classList.contains("deadly")) {
+            playSound("./assets/soundTrack/player/death.wav");
+            entityA.alive = false;
+            return;
+        }
+        if (entityB.elem.classList.contains("cart")) {
+            entityB.active = true;
+            entityB.withPlayer = true;
+        }
+
         if (overlapX < overlapY) {
             resolveX(entityA, entityB);
         } else if (overlapX >= overlapY) {
             resolveY(entityA, entityB);
         }
+
+
     });
 }
 
@@ -95,11 +117,11 @@ function resolveY(entityA, entityB) {
     }
 }
 
-// function stopDash(entity) {
-//     if (entity.components.powers?.dash) {
-//         entity.components.powers.dash.distanceTravelled = 100000;
-//     }
-// }
+function stopDash(entity) {
+    if (entity.components.powers?.dash) {
+        entity.components.powers.dash.distanceTravelled = 100000;
+    }
+}
 
 function left(entityA, entityB) {
     const offSetA = getOffSet(entityA);
@@ -107,7 +129,7 @@ function left(entityA, entityB) {
 
     entityA.position.x = boundsB.left - entityA.dimensions.width + offSetA.right;
 
-    // stopDash(entityA);
+    stopDash(entityA);
 }
 
 function right(entityA, entityB) {
@@ -117,32 +139,45 @@ function right(entityA, entityB) {
 
     entityA.position.x = boundsB.right - offSetA.left;
 
-    // stopDash(entityA);
+    stopDash(entityA);
 }
 
 function top(entityA, entityB) {
     const offSetA = getOffSet(entityA);
     const boundsB = getBounds(entityB);
 
-    entityA.position.y = boundsB.top - entityA.dimensions.height + offSetA.bottom;
+    entityA.position.y =
+        boundsB.top -
+        entityA.dimensions.height +
+        offSetA.bottom;
+
+    if (entityB.elem.classList.contains("cart") && entityB.distanceTraveled <= entityB.maxDistance) {
+        entityB.active = true;
+        entityB.withPlayer = true;
+    }
+
+    if (entityB.elem.classList.contains("cracked") && !entityB.elem.classList.contains("falling")) {
+        if (!entityB.playedBreakSound) {
+            entityB.playedBreakSound = true;
+            playSound("./assets/soundTrack/breakBridge.wav");
+        }
+        setTimeout(() => {
+            entityB.elem.classList.add("falling");
+
+        }, 500)
+
+
+    }
 
     if (entityA.components.physics?.gravity) {
         entityA.components.physics.gravity.isGround = true;
-        if (entityA.components.physics.gravity.vy > 100) {
-            playSound(
-                "assets/soundTrack/player/land_00_asphalt_04.wav"
-            );
-        }
         entityA.components.physics.gravity.vy = 0;
     }
 
     if (entityA.components.powers?.jump) {
         entityA.components.powers.jump.isJumping = false;
         entityA.components.powers.jump.doubleJump = false;
-
     }
-
-    // stopDash(entityA);
 }
 
 function bottom(entityA, entityB) {
@@ -151,7 +186,7 @@ function bottom(entityA, entityB) {
 
     entityA.position.y = boundsB.bottom - offSetA.top;
 
-    // stopDash(entityA);
+    stopDash(entityA);
 }
 
 export function gravity(entities = [], dt) {

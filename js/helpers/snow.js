@@ -1,5 +1,5 @@
 // snow.js
-const MAX_FLAKES = 3; // keep it light — DOM nodes are heavier than canvas particles
+const MAX_FLAKES = 1; // keep it light — DOM nodes are heavier than canvas particles
 
 export function createSnow(container) {
     const flakes = [];

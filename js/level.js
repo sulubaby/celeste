@@ -50,6 +50,30 @@ export class Level {
         this.systems.splice(index, 1);
     }
 
+    removeEntity(entity) {
+        const index = this.entities.indexOf(entity);
+
+        if (index === -1) {
+            console.error(`${entity} is not in entities`);
+            return;
+        }
+
+        if (entity.elem && entity.elem.parentNode) {
+            entity.elem.parentNode.removeChild(entity.elem);
+        }
+
+        this.entities.splice(index, 1);
+
+        const renderIndex = this.renderEntities.indexOf(entity);
+        if (renderIndex !== -1) {
+            this.renderEntities.splice(renderIndex, 1);
+        }
+    }
+
+    removeEntities() {
+        this.parent.innerHTML = "";
+    }
+
     mountEntities() {
         this.entities.forEach(entity => {
             this.parent.appendChild(entity.elem);
@@ -86,7 +110,7 @@ export class Level {
     }
 
     update(dt) {
-        this.conditions(dt);
+        if (this.conditions) this.conditions(dt);
         if (player.alive) {
             collision(player, this.entities.filter((entity) => entity !== player), dt);
         }

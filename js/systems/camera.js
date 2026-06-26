@@ -1,30 +1,49 @@
+
 export class Camera {
     position = { x: 0, y: 0 };
 
     constructor(target) {
         this.target = target;
+
+        this.CHUNK_WIDTH = 1200;
+        this.CHUNK_HEIGHT = 500;
+
+        this.chunkX = 0;
+        this.chunkY = 0;
     }
 
     update() {
         if (!this.target) return;
-
-        const SCREEN_WIDTH = 1200;
-        const TRANSITION = 100;
-
-        const playerX = this.target.position.x;
-
-        const chunk = Math.floor(playerX / SCREEN_WIDTH);
-        const chunkStart = chunk * SCREEN_WIDTH;
-        const chunkEnd = chunkStart + SCREEN_WIDTH;
-
-        let cameraX = chunkStart;
-
-        if (playerX > chunkEnd - TRANSITION) {
-            const t = (playerX - (chunkEnd - TRANSITION)) / TRANSITION;
-
-            cameraX = chunkStart + t * SCREEN_WIDTH;
+        let playerX = this.position.x;
+        let playerY = this.position.y;
+        if (this.target) {
+            playerX = this.target.position.x;
+            playerY = this.target.position.y;
         }
 
-        this.position.x = cameraX;
+
+
+        // Move right
+        while (playerX >= (this.chunkX + 1) * this.CHUNK_WIDTH) {
+            this.chunkX++;
+        }
+
+        // Move left
+        while (playerX < this.chunkX * this.CHUNK_WIDTH) {
+            this.chunkX--;
+        }
+
+        // Move down
+        while (playerY >= (this.chunkY + 1) * this.CHUNK_HEIGHT) {
+            this.chunkY++;
+        }
+
+        // Move up
+        while (playerY < this.chunkY * this.CHUNK_HEIGHT) {
+            this.chunkY--;
+        }
+
+        this.position.x = this.chunkX * this.CHUNK_WIDTH;
+        this.position.y = this.chunkY * this.CHUNK_HEIGHT;
     }
 }

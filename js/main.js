@@ -9,19 +9,36 @@ import { initInputs } from "./systems/input.js";
 import { collision, gravity } from "./systems/physics.js";
 import { gameState, pauseGame, resumeGame } from "./helpers/gameState.js";
 import { hideDialogue, showDialogue } from "./helpers/sign.js";
+import { firstLevel } from "./levels/firstLevel.js";
+import { showMainMenu } from "./helpers/mainMenu.js";
 
+console.log('loaded');
+
+export const levels = [createTutorial, firstLevel];
+export let level = 0;
+
+export function setLevel(n) {
+  level = n;
+}
 export const gameContainer = document.getElementById("game");
+export let mainLevel;
 
-export const player = createPlayer({
-  x: 4000,
-  y: 100
 
-}, {
-  height: 64,
-  width: 64,
-},
-  "./assets/player3.png",
+export const player = createPlayer(
+  {
+    x: 3400,
+    y: -2700
+  },
+  {
+    width: 64,
+    height: 64
+  },
+  "./assets/player3.png"
 );
+
+export const camera = new Camera(player);
+
+export let animationFrameId = null;
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "e" && !e.repeat) {
@@ -33,41 +50,31 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-export const bird = createBird();
+showMainMenu();
 
-export let mainLevel;
-
-mainLevel = await createTutorial();
-mainLevel.mountEntities();
-
-console.log(bird);
-
-export const camera = new Camera(player);
-
-initInputs();
-
-const snow = createSnow(gameContainer);
-
-let lastTime = performance.now();
-
-<<<<<<< HEAD
-console.log(player);
-// showDialogue();
-setTimeout(hideDialogue, 1000);
-
-=======
->>>>>>> ccb6d515540d0b0fb80f943f4e9239a382444d98
-function gameLoop(currentTime) {
-  if (!gameState.isPaused) {
-    let dt = (currentTime - lastTime) / 1000;
-    lastTime = currentTime;
-
-    if (dt > 0.1) dt = 0.1;
-    mainLevel.update(dt);
-    camera.update();
-    snow.update(dt);
+export function main(level) {
+  if (animationFrameId !== null) {
+    cancelAnimationFrame(animationFrameId);
   }
-  requestAnimationFrame(gameLoop);
-}
 
-requestAnimationFrame(gameLoop);
+  mainLevel = level;
+  mainLevel.mountEntities();
+
+  let lastTime = performance.now();
+
+  function gameLoop(currentTime) {
+    if (!gameState.isPaused) {
+      let dt = (currentTime - lastTime) / 1000;
+      lastTime = currentTime;
+
+      if (dt > 0.1) dt = 0.1;
+
+      mainLevel.update(dt);
+      camera.update();
+    }
+
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  animationFrameId = requestAnimationFrame(gameLoop);
+}

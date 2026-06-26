@@ -4,7 +4,7 @@ const dialogue = document.getElementById("dialogue");
 const dialogueText = document.getElementById("dialogueText");
 const dialogueImage = dialogue.querySelector("img");
 
-function wait(ms) {
+export function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 

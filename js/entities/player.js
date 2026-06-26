@@ -6,9 +6,10 @@ import { Entity } from "./entity.js";
 import { createGhost } from "./ghost.js";
 import { playSound } from "../helpers/sound.js"
 import { birdSounded, grannyConvo, granyConvoEnd } from "../levels/tutorial.js";
-import { bird, mainLevel, player } from "../main.js";
+import { camera, mainLevel, player } from "../main.js";
 import { getBounds, isTouchingLeftWall, isTouchingRightWall } from "../systems/physics.js";
 import { hideSign, showSign } from "../helpers/sign.js";
+import { wait } from "../helpers/scene.js";
 
 export function createPlayer(
     spawnPosition = {
@@ -29,11 +30,13 @@ export function createPlayer(
     addMovement(player, 350);
     applyGravity(player, 1000);
     addJump(player, 400);
-    addDashing(player, 100);
+    addDashing(player, 120);
+    player.noControl = false;
+
     addOffSet(player, {
         top: 5,
         right: 10,
-        left: 5,
+        left: 10,
         bottom: 5
     });
     addCollisionDetect(player);
@@ -87,6 +90,13 @@ export function createPlayer(
         fps: 8
     });
 
+    addAnimation(player, "sit", {
+        row: 8,
+        startFrame: 8,
+        frameCount: 1,
+        fps: 8
+    });
+    
     return player;
 }
 
@@ -170,7 +180,7 @@ export function playerUpdate(player, dt) {
                 playAnimation(player, "run");
             }
         } else {
-            if (grannyConvo && !granyConvoEnd) return;
+            if (player.noControl) return;
             playAnimation(player, "idle");
         }
 
@@ -194,7 +204,7 @@ function renderSprite(player) {
         `-${frame * frameWidth}px -${sprite.row * frameHeight}px`;
 }
 
-export function playerDeath(dt) {
+export async function playerDeath(dt) {
     renderSprite(player)
     window.removeEventListener('keydown', detectInput)
     window.removeEventListener('keyup', removeKey);
@@ -203,6 +213,8 @@ export function playerDeath(dt) {
     playAnimation(player, "death");
 
     player.position.y -= 350 * dt;
+    await wait(200);
+
 
 }
 
@@ -258,7 +270,7 @@ function dash(player, dt) {
         }
     }
 
-    loop = setInterval(perform, 20);
+    loop = setInterval(perform, 60);
 
     window.addEventListener('keydown', detectInput);
     window.addEventListener('keyup', removeKey);

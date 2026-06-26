@@ -1,39 +1,64 @@
 import { Entity } from "../entities/entity.js";
 import { Level } from "../level.js";
-import { bird, camera, gameContainer, mainLevel, player } from "../main.js";
+import { animationFrameId, camera, gameContainer, levels, main, mainLevel, player } from "../main.js";
 import { collision, gravity } from "../systems/physics.js";
 import { animationSystem } from "../systems/animationSystem.js";
 import { addAnimation, playAnimation } from "../components/animation.js";
-import { createBird } from "../entities/bird.js";
 import { playSound } from "../helpers/sound.js";
 import { hideSign, revealTitle, showSign } from "../helpers/sign.js";
 import { applyGravity } from "../components/physics.js";
 import { playerDeath } from "../entities/player.js";
-import { detectInput, inputs, keys, removeKey } from "../systems/input.js";
-import { showDialogue } from "../helpers/scene.js";
+import { detectInput, initInputs, inputs, keys, removeKey } from "../systems/input.js";
+import { showDialogue, wait } from "../helpers/scene.js";
+import { createSnow } from "../helpers/snow.js";
+import { createBird } from "../entities/bird.js";
+import { showMainMenu, showWinScreen, stopGame } from "../helpers/mainMenu.js";
 
-const fallingBlocks = createFallingBlock();
+let fallingBlocks;
 let level;
+let snow;
 export let birdSounded = false;
 let triggered = false;
 let soundTriggered = false;
 let death = false;
+let first = false;
 let breakTrapTriggered = false;
 let birdLanded = false;
 export let grannyConvo = false;
 export let granyConvoEnd = false;
 
+let bird;
 let dashTutorial = false;
 let positionX = 0;
 let positionY = 0;
 
 export async function createTutorial() {
+    fallingBlocks = createFallingBlock();
+    player.alive = true;
+    death = false;
+    first = false;
+    triggered = false;
+    soundTriggered = false;
+    breakTrapTriggered = false;
+    birdLanded = false;
+    birdSounded = false;
+    grannyConvo = false;
+    granyConvoEnd = false;
+    dashTutorial = false;
+    camera.target = player;
+
+    player.position = {
+        x: 0,
+        y: 200
+    }
+
     const response = await fetch("./js/data/levels.json");
     const levelData = await response.json();
-
+    bird = createBird();
+    
     level = new Level({ height: 550, width: 1200 }, gameContainer);
     level.addSystem(gravity);
-
+    camera.target = player;
     level.addSystem(animationSystem);
     level.addEntity(bird);
 
@@ -78,16 +103,28 @@ export async function createTutorial() {
         fps: 12
     });
     playAnimation(grany, "idle");
-    bird.components.movement = {
-        direction: -1
-    }
+    bird.components.movement = {}
+    bird.components.movement.direction = -1;
     level.addEntity(grany);
 
+    initInputs();
     level.setConditions(conditions);
+    snow = createSnow(gameContainer);
+
     return level;
 }
 
 async function conditions(dt) {
+    if (death && !first) {
+        first = true;
+        stopGame();
+        await wait(1000);
+
+        mainLevel.removeEntities();
+        let newLevel = await createTutorial();
+        main(newLevel);
+    }
+    snow.update(dt);
     // falling snow blocks
     if ((player.position.x >= 1100 || triggered)) {
         triggered = true;
@@ -136,6 +173,7 @@ async function conditions(dt) {
 
 
         player.alive = false;
+        death = true;
     }
     breakTrap(player);
 
@@ -144,7 +182,7 @@ async function conditions(dt) {
         dashTutorial = true;
         dashTutorialScene();
     }
-    //7009 = x, y = 271
+
     if (dashTutorial && inputs.includes(keys.dash)) {
         player.freeze = false;
     }
@@ -152,14 +190,20 @@ async function conditions(dt) {
     let loop;
     if (player.position.x >= 7001 && player.position.y <= 271) {
         player.freeze = true;
+        camera.target = null;
         playAnimation(player, "idle");
-        function cameraMovement() {
+        async function cameraMovement() {
             camera.position.y -= 3;
             if (camera.position.y <= -100) {
                 clearInterval(loop);
                 if (!level.end) {
                     revealTitle(document.getElementById('title'), 'YOU CAN DO IT');
                     level.end = true
+
+                    await wait(3500);
+                    stopGame();
+                    levels.tutorial = true;
+                    showWinScreen(0, 0);
                 }
             }
         }
@@ -168,6 +212,7 @@ async function conditions(dt) {
     }
 
     if (player.position.x >= 4090 && !grannyConvo && !granyConvoEnd) {
+        player.noControl = true;
         playAnimation(player, "talk");
         window.removeEventListener('keydown', detectInput);
         window.removeEventListener('keyup', removeKey);
@@ -255,6 +300,8 @@ async function conditions(dt) {
         granyConvoEnd = true;
         window.addEventListener('keydown', detectInput);
         window.addEventListener('keyup', removeKey);
+        player.noControl = false;
+
     }
 }
 

@@ -11,13 +11,103 @@
 <body>
     <div id="game">
         <h1 class="title" id="title"></h1>
+
+        <div id="main-menu" class="hidden">
+            <div class="menu-content">
+                <svg class="menu-logo" viewBox="0 0 100 90" aria-hidden="true">
+                    <polygon points="30,8 52,68 8,68" fill="#dff3ff" />
+                    <polygon points="30,8 52,68 38,68 22,32" fill="#aee0ff" />
+                    <polygon points="60,28 92,68 28,68" fill="#eafbff" />
+                    <polygon points="60,28 92,68 60,68" fill="#bfe9ff" />
+                    <polygon points="60,28 78,68 60,68" fill="#8fd2f4" />
+                </svg>
+
+                <h1 class="menu-title">celeste<span style="font-size: 14px; margin: 0;"><br>ali express editions</span>
+                </h1>
+
+                <nav class="menu-list">
+
+                    <button id="choose-level-btn" class="menu-row">
+                        <span class="menu-row-icon">🗺</span>
+                        <span class="menu-row-label">Choose Level</span>
+                    </button>
+
+                </nav>
+
+                <div id="level-select" class="level-select hidden">
+                    <button id="level-back-btn" class="menu-row menu-row--back">
+                        <span class="menu-row-icon">↩</span>
+                        <span class="menu-row-label">Back</span>
+                    </button>
+
+                    <nav class="menu-list menu-list--levels">
+                        <button class="menu-row" id="tutorial-btn">
+                            <span class="menu-row-icon">00</span>
+                            <span class="menu-row-label">Tutorial</span>
+                        </button>
+                        <button class="menu-row" id="oldSite">
+                            <span class="menu-row-icon">02</span>
+                            <span class="menu-row-label">Old Site</span>
+                        </button>
+
+                    </nav>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="pause-menu" class="hidden">
-        <div class="pause-box">
-            <h1>paused</h1>
-            <button id="continue-btn">Continue</button>
-            <button class="restart-btn">Restart</button>
+        <div class="menu-content">
+            <svg class="menu-logo" viewBox="0 0 100 90" aria-hidden="true">
+                <polygon points="30,8 52,68 8,68" fill="#dff3ff" />
+                <polygon points="30,8 52,68 38,68 22,32" fill="#aee0ff" />
+                <polygon points="60,28 92,68 28,68" fill="#eafbff" />
+                <polygon points="60,28 92,68 60,68" fill="#bfe9ff" />
+                <polygon points="60,28 78,68 60,68" fill="#8fd2f4" />
+            </svg>
+            
+            <h1 class="menu-title">paused</h1>
+
+            <nav class="menu-list">
+                <button id="continue-btn" class="menu-row">
+                    <span class="menu-row-icon">▶</span>
+                    <span class="menu-row-label">Continue</span>
+                </button>
+                <button id="res-btn" class="menu-row">
+                    <span class="menu-row-icon">↺</span>
+                    <span class="menu-row-label">Restart</span>
+                </button>
+                <button id="main-menu-btn" class="menu-row">
+                    <span class="menu-row-label">Main Menu</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <div id="win-screen" class="hidden">
+        <div class="menu-content win-content">
+            <svg class="menu-logo" viewBox="0 0 100 90" aria-hidden="true">
+                <polygon points="30,8 52,68 8,68" fill="#dff3ff" />
+                <polygon points="30,8 52,68 38,68 22,32" fill="#aee0ff" />
+                <polygon points="60,28 92,68 28,68" fill="#eafbff" />
+                <polygon points="60,28 92,68 60,68" fill="#bfe9ff" />
+                <polygon points="60,28 78,68 60,68" fill="#8fd2f4" />
+            </svg>
+
+            <h1 class="menu-title">level complete</h1>
+
+            <div class="win-collectable">
+                <img id="win-collectable-icon" class="win-collectable-icon" src=""
+                    alt="Collectable">
+                <span id="win-collectable-count" class="win-collectable-count">0 / 0</span>
+            </div>
+
+            <nav class="menu-list">
+                <button id="win-main-menu-btn" class="menu-row">
+                    <span class="menu-row-icon">🏠</span>
+                    <span class="menu-row-label">Main Menu</span>
+                </button>
+            </nav>
         </div>
     </div>
     <div id="dialogue" class="dialogue-box hidden">
