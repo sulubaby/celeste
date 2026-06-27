@@ -4,7 +4,7 @@ import { showDialogue, wait } from "../helpers/scene.js";
 import { createSnow } from "../helpers/snow.js";
 import { playSound } from "../helpers/sound.js";
 import { Level } from "../level.js";
-import { gameContainer, player } from "../main.js";
+import { gameContainer, isStrawberryCollected, player } from "../main.js";
 import { animationSystem } from "../systems/animationSystem.js";
 import { detectInput, initInputs, inputs, removeKey } from "../systems/input.js";
 import { gravity } from "../systems/physics.js";
@@ -13,10 +13,13 @@ let level;
 let carts;
 let bird;
 let snow;
+let death = false;
 
 export let endScene = false;
 
 export async function firstLevel() {
+    player.alive = true;
+    death = false;
     player.position = {
         x: 20,
         y: 20
@@ -207,12 +210,16 @@ function conditions(dt) {
 
 function makeStrawBerry() {
     const positions = [
-        { x: 1450, y: -400, id: "" },
-        { x: 3430, y: -1400 },
-        { x: 2430, y: -2400 }
+        { x: 1450, y: -400, id: "first-level-strawberry-1" },
+        { x: 3430, y: -1400, id: "first-level-strawberry-2" },
+        { x: 2430, y: -2400, id: "first-level-strawberry-3" }
     ];
 
     for (let i = 0; i < positions.length; i++) {
+        if (isStrawberryCollected(positions[i].id)) {
+            continue;
+        }
+
         const berry = new Entity({ x: positions[i].x, y: positions[i].y }, { height: 64, width: 64 }, positions[i].id);
         berry.elem.classList.add("strawBerry");
         berry.elem.classList.add("none-collision");

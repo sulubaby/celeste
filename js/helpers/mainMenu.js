@@ -1,7 +1,7 @@
 
 import { firstLevel } from "../levels/firstLevel.js";
 import { createTutorial } from "../levels/tutorial.js";
-import { animationFrameId, level, levels, main, mainLevel, setLevel } from "../main.js";
+import { animationFrameId, level, levels, main, mainLevel, resetGameProgress, setLevel } from "../main.js";
 import { resumeGame } from "./gameState.js";
 import { wait } from "./scene.js";
 
@@ -32,6 +32,7 @@ levelBackBtn.addEventListener("click", () => {
 
 document.getElementById('tutorial-btn').addEventListener('click', async () => {
   hideMainMenu();
+  resetGameProgress();
   setLevel(0);
   const level = await createTutorial();
   main(level)
@@ -39,6 +40,7 @@ document.getElementById('tutorial-btn').addEventListener('click', async () => {
 
 document.getElementById('oldSite').addEventListener('click', async () => {
   hideMainMenu();
+  resetGameProgress();
   setLevel(1)
   const level = await firstLevel();
   main(level)
