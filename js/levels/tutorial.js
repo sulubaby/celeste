@@ -1,18 +1,18 @@
 import { Entity } from "../entities/entity.js";
 import { Level } from "../level.js";
-import { animationFrameId, camera, gameContainer, levels, main, mainLevel, player } from "../main.js";
+import { animationFrameId, camera, gameContainer, gameTimeRemaining, levels, main, mainLevel, player } from "../main.js";
 import { collision, gravity } from "../systems/physics.js";
 import { animationSystem } from "../systems/animationSystem.js";
 import { addAnimation, playAnimation } from "../components/animation.js";
 import { playSound } from "../helpers/sound.js";
 import { hideSign, revealTitle, showSign } from "../helpers/sign.js";
 import { applyGravity } from "../components/physics.js";
-import { playerDeath } from "../entities/player.js";
+import { deathCount, playerDeath } from "../entities/player.js";
 import { detectInput, initInputs, inputs, keys, removeKey } from "../systems/input.js";
 import { showDialogue, wait } from "../helpers/scene.js";
 import { createSnow } from "../helpers/snow.js";
 import { createBird } from "../entities/bird.js";
-import { showEndDialogue, showMainMenu, showWinScreen, stopGame } from "../helpers/mainMenu.js";
+import { fadeFromBlack, showEndDialogue, showMainMenu, showWinScreen, stopGame } from "../helpers/mainMenu.js";
 import { resumeGame } from "../helpers/gameState.js";
 
 let fallingBlocks;
@@ -25,15 +25,19 @@ let death = false;
 let first = false;
 let breakTrapTriggered = false;
 let birdLanded = false;
-export let grannyConvo = false;
-export let granyConvoEnd = false;
+let dashBird;
+
+export let grannyConvo = true;
+export let granyConvoEnd = true;
 
 let bird;
 let dashTutorial = false;
 let positionX = 0;
 let positionY = 0;
 
-export async function createTutorial() {
+export async function createTutorial(reset = true) {
+    fadeFromBlack(7000);
+
     resumeGame()
     initInputs();
     fallingBlocks = createFallingBlock();
@@ -45,10 +49,16 @@ export async function createTutorial() {
     breakTrapTriggered = false;
     birdLanded = false;
     birdSounded = false;
-    grannyConvo = false;
-    granyConvoEnd = false;
     dashTutorial = false;
     camera.target = player;
+    player.freeze = false;
+
+    if (reset) {
+        grannyConvo = false;
+        granyConvoEnd = false;
+        player.lives = 3;
+        document.getElementById('live-count').textContent = `Lives: ${player.lives}`;
+    }
 
     player.position = {
         x: 0,
@@ -61,15 +71,14 @@ export async function createTutorial() {
 
     level = new Level({ height: 550, width: 1200 }, gameContainer);
     level.addSystem(gravity);
-    camera.target = player;
-    player.freeze = false;
+
     level.addSystem(animationSystem);
     level.addEntity(bird);
-
     for (let i = 0; i < fallingBlocks.length; i++) {
         level.addEntity(fallingBlocks[i]);
     }
 
+    dashBird = createDashBird();
 
     Object.values(levelData.tutorial.tiles).forEach(tileData => {
         tileData.positions.forEach(position => {
@@ -110,6 +119,7 @@ export async function createTutorial() {
     bird.components.movement = {}
     bird.components.movement.direction = -1;
     level.addEntity(grany);
+    level.addEntity(dashBird);
 
     initInputs();
     level.setConditions(conditions);
@@ -125,7 +135,7 @@ async function conditions(dt) {
         await wait(1000);
 
         mainLevel.removeEntities();
-        let newLevel = await createTutorial();
+        let newLevel = await createTutorial(false);
         main(newLevel);
     }
     snow.update(dt);
@@ -163,6 +173,7 @@ async function conditions(dt) {
         player.alive = false;
         if (!death) {
             death = true;
+            deathCount();
         }
     }
 
@@ -177,6 +188,9 @@ async function conditions(dt) {
 
 
         player.alive = false;
+        if (!death) {
+            deathCount();
+        }
         death = true;
     }
     breakTrap(player);
@@ -206,7 +220,7 @@ async function conditions(dt) {
                     await wait(3500);
                     stopGame();
                     levels.tutorial = true;
-                    showEndDialogue(1, null);
+                    showEndDialogue(getTimeScore(gameTimeRemaining), null);
                 }
             }
         }
@@ -359,10 +373,8 @@ function breakTrap(player) {
     }
 }
 
-
-function dashTutorialScene(dt) {
-    // landing position x = 7100, y = 240
-    const bird = new Entity({ x: 7200, y: 80 }, { height: 56, width: 64 }, "bird");
+function createDashBird() {
+    const bird = new Entity({ x: 7100, y: 240 }, { height: 56, width: 64 }, "bird");
     bird.setSpriteSheet("./assets/bird.png");
     bird.elem.classList.add('none-collision');
     bird.components.movement = {
@@ -390,46 +402,34 @@ function dashTutorialScene(dt) {
         fps: 12
     });
 
-    playAnimation(bird, "fly");
+    playAnimation(bird, "idle")
+    return bird;
+}
 
-    const landing = {
-        x: 7100,
-        y: 240
-    };
+function dashTutorialScene(bird, dt) {
+    // landing position x = 7100, y = 240
 
-    const speed = 180;
 
-    function birdUpdate(bird, dt) {
-        const dx = landing.x - bird.position.x;
-        const dy = landing.y - bird.position.y;
+    function birdUpdate(dashBird, dt) {
 
-        const distance = Math.hypot(dx, dy);
+        if (!birdLanded) {
+            birdLanded = true;
+            playSound("./assets/soundTrack/bird/squawk.wav");
+            playAnimation(dashBird, "sound");
 
-        if (distance > 2) {
-            bird.position.x += (dx / distance) * speed * dt;
-            bird.position.y += (dy / distance) * speed * dt;
-        } else {
-            bird.position.x = landing.x;
-            bird.position.y = landing.y;
+            let sign = showSign("./assets/signs/dash_sign.png", 920, 150, document.getElementById('game'));
 
-            if (!birdLanded) {
-                birdLanded = true;
-                playSound("./assets/soundTrack/bird/squawk.wav");
-                playAnimation(bird, "sound");
-                const sign = new Entity({ x: 6970, y: 160 }, { height: 130, width: 220 }, "dashSign");
-                sign.setSpriteSheet("./assets/signs/dash_sign.png");
-                sign.elem.style.backgroundSize = 'cover';
-                sign.elem.classList.add('none-collision');
+            setTimeout(() => {
+                hideSign(sign);
+            }, 3000);
 
-                level.addEntity(sign);
-                level.mountEntities();
-                setTimeout(() => {
-                    playAnimation(bird, "idle");
-                }, 600);
-            }
+            setTimeout(() => {
+                playAnimation(dashBird, "idle");
+            }, 600);
         }
 
-        const animation = bird.components.animation;
+
+        const animation = dashBird.components.animation;
         if (!animation) return;
 
         const sprite = animation.sprites[animation.state.sprite];
@@ -437,13 +437,13 @@ function dashTutorialScene(dt) {
 
         const frame = sprite.startFrame + animation.state.frame;
 
-        bird.elem.style.backgroundPosition =
-            `-${frame * bird.dimensions.width}px -${sprite.row * bird.dimensions.height}px`;
+        dashBird.elem.style.backgroundPosition =
+            `-${frame * dashBird.dimensions.width}px -${sprite.row * dashBird.dimensions.height}px`;
     }
 
-    bird.setUpdate(birdUpdate);
+    dashBird.setUpdate(birdUpdate);
 
-    level.addEntity(bird);
+    level.addEntity(dashBird);
     level.mountEntities();
 }
 
@@ -471,4 +471,20 @@ function granyUpdate(grany) {
 
     grany.elem.style.backgroundPosition =
         `-${frame * frameWidth}px -${sprite.row * frameHeight}px`;
+}
+
+export function getTimeScore(timeInSeconds) {
+    const threeMinutes = 180;
+    const fourMinutes = 240;
+
+    if (timeInSeconds < threeMinutes) {
+        const progress = timeInSeconds / threeMinutes;
+        return Math.round(100 - progress * 20);
+    }
+
+    if (timeInSeconds < fourMinutes) {
+        return 80;
+    }
+
+    return 60;
 }

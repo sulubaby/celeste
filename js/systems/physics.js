@@ -1,6 +1,7 @@
+import { playerDeath } from "../entities/player.js";
 import { playSound } from "../helpers/sound.js";
 import { Level } from "../level.js";
-import { mainLevel } from "../main.js";
+import { collectStrawberry, mainLevel } from "../main.js";
 
 let first = true;
 
@@ -37,6 +38,7 @@ export function collision(entityA, entities = [], dt) {
         if (entityB.elem.classList.contains("strawBerry")) {
             playSound("./assets/soundTrack/strawBerry.wav");
             mainLevel.removeEntity(entityB);
+            collectStrawberry(entityB.id);
             return;
         }
         if (entityB.elem.classList.contains("fall")) {

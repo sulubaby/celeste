@@ -70,8 +70,19 @@ export class Level {
         }
     }
 
-    removeEntities() {
-        this.parent.innerHTML = "";
+    removeEntities(entities = this.entities) {
+        this.entities = this.entities.filter(entity => {
+            if (!entities.includes(entity)) {
+                return true; // Keep entities not being removed
+            }
+
+            if (entity.elem.id === "game-hud") {
+                return true; // Never remove HUD
+            }
+
+            entity.elem.remove();
+            return false; // Remove from this.entities
+        });
     }
 
     mountEntities() {

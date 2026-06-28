@@ -1,8 +1,8 @@
 
 import { firstLevel } from "../levels/firstLevel.js";
 import { createTutorial } from "../levels/tutorial.js";
-import { animationFrameId, level, levels, main, mainLevel, setLevel } from "../main.js";
-import { resumeGame } from "./gameState.js";
+import { animationFrameId, level, levels, main, mainLevel, resetGameProgress, setLevel } from "../main.js";
+import { gameState, resumeGame } from "./gameState.js";
 import { wait } from "./scene.js";
 
 const mainMenu = document.getElementById("main-menu");
@@ -32,13 +32,15 @@ levelBackBtn.addEventListener("click", () => {
 
 document.getElementById('tutorial-btn').addEventListener('click', async () => {
   hideMainMenu();
+  resetGameProgress();
   setLevel(0);
   const level = await createTutorial();
-  main(level);
+  await main(level);
 })
 
 document.getElementById('oldSite').addEventListener('click', async () => {
   hideMainMenu();
+  resetGameProgress();
   setLevel(1)
   const level = await firstLevel();
   main(level)
@@ -48,13 +50,15 @@ export function stopGame() {
   cancelAnimationFrame(animationFrameId);
 }
 
+
 document.getElementById("res-btn").addEventListener("click", async () => {
   stopGame();
 
+  resetGameProgress();
   await wait(500);
   mainLevel.removeEntities();
   const func = levels[level];
-  const newLevel = await func();
+  const newLevel = await func(true);
   main(newLevel);
   resumeGame();
 });
@@ -107,7 +111,7 @@ endDialogueRestartBtn.addEventListener("click", async () => {
   await wait(500);
   mainLevel.removeEntities();
   const func = levels[level];
-  const newLevel = await func();
+  const newLevel = await func(true);
   main(newLevel);
   resumeGame();
 
@@ -118,3 +122,44 @@ endDialogueMainMenuBtn.addEventListener("click", () => {
   stopGame();
   showMainMenu();
 });
+
+document.getElementById('lose-restart-btn').addEventListener('click', async () => {
+  document.getElementById("lose-screen").classList.add("hidden");
+  await wait(500);
+  mainLevel.removeEntities();
+  const func = levels[level];
+  const newLevel = await func(true);
+  main(newLevel);
+  gameState.isGameOver = false;
+  resumeGame();
+})
+
+export function fadeFromBlack(duration = 1000) {
+    const game = document.getElementById("game");
+
+    if (getComputedStyle(game).position === "static") {
+        game.style.position = "relative";
+    }
+
+    const overlay = document.createElement("div");
+    overlay.style.position = "absolute";
+    overlay.style.inset = "0";
+    overlay.style.background = "black";
+    overlay.style.opacity = "1"; // Start fully black
+    overlay.style.pointerEvents = "none";
+    overlay.style.transition = `opacity ${duration}ms ease`;
+    overlay.style.zIndex = "9999";
+
+    game.appendChild(overlay);
+
+    requestAnimationFrame(() => {
+        overlay.style.opacity = "0"; // Fade out
+    });
+
+    return new Promise(resolve => {
+        setTimeout(() => {
+            overlay.remove();
+            resolve();
+        }, duration);
+    });
+}

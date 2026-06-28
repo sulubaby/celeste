@@ -6,10 +6,11 @@ import { Entity } from "./entity.js";
 import { createGhost } from "./ghost.js";
 import { playSound } from "../helpers/sound.js"
 import { birdSounded, grannyConvo, granyConvoEnd } from "../levels/tutorial.js";
-import { camera, mainLevel, player } from "../main.js";
+import { camera, mainLevel, player, showLoseScreen } from "../main.js";
 import { getBounds, isTouchingLeftWall, isTouchingRightWall } from "../systems/physics.js";
 import { hideSign, showSign } from "../helpers/sign.js";
 import { wait } from "../helpers/scene.js";
+import { showEndDialogue, stopGame } from "../helpers/mainMenu.js";
 
 export function createPlayer(
     spawnPosition = {
@@ -30,8 +31,9 @@ export function createPlayer(
     addMovement(player, 350);
     applyGravity(player, 1000);
     addJump(player, 400);
-    addDashing(player, 120);
+    addDashing(player, 80);
     player.noControl = false;
+    player.lives = 3;
 
     addOffSet(player, {
         top: 5,
@@ -96,11 +98,19 @@ export function createPlayer(
         frameCount: 1,
         fps: 8
     });
-    
+
+    addAnimation(player, "dash", {
+        row: 10,
+        startFrame: 0,
+        frameCount: 4,
+        fps: 12
+    });
+
     return player;
 }
 
 export function playerUpdate(player, dt) {
+    
     if (player.freeze) return;
     if (!player.alive) {
         playerDeath(dt);
@@ -163,6 +173,11 @@ export function playerUpdate(player, dt) {
     }
     renderSprite(player);
     player.position.y += player.components.physics.gravity.vy * dt;
+
+    if(player.components.powers.dash.isDashing) {
+        playAnimation(player, "dash")
+        return;
+    }
     if ((player.components.physics.gravity.vy <= -300) ||
         (player.components.physics.gravity.vy >= 50)) {
         if (
@@ -204,6 +219,15 @@ function renderSprite(player) {
         `-${frame * frameWidth}px -${sprite.row * frameHeight}px`;
 }
 
+export function deathCount() {
+    player.lives--;
+    if(player.lives <= 0) {
+        stopGame();
+        showLoseScreen()
+    }
+    document.getElementById('live-count').textContent = `Lives: ${player.lives}`;
+}
+
 export async function playerDeath(dt) {
     renderSprite(player)
     window.removeEventListener('keydown', detectInput)
@@ -214,8 +238,6 @@ export async function playerDeath(dt) {
 
     player.position.y -= 350 * dt;
     await wait(200);
-
-
 }
 
 function dash(player, dt) {
@@ -250,7 +272,6 @@ function dash(player, dt) {
 
     function perform() {
         player.components.physics.gravity.vy = 0;
-        createGhost(player, "./assets/player3.png")
         const step = dash.dashPower;
 
         player.position.x += dx * step;
@@ -270,7 +291,7 @@ function dash(player, dt) {
         }
     }
 
-    loop = setInterval(perform, 60);
+    loop = setInterval(perform, 100);
 
     window.addEventListener('keydown', detectInput);
     window.addEventListener('keyup', removeKey);

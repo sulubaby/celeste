@@ -1,25 +1,53 @@
 import { addAnimation, playAnimation } from "../components/animation.js";
 import { Entity } from "../entities/entity.js";
+import { deathCount } from "../entities/player.js";
+import { gameState, resumeGame } from "../helpers/gameState.js";
+import { fadeFromBlack, showEndDialogue, stopGame } from "../helpers/mainMenu.js";
 import { showDialogue, wait } from "../helpers/scene.js";
 import { createSnow } from "../helpers/snow.js";
 import { playSound } from "../helpers/sound.js";
 import { Level } from "../level.js";
-import { gameContainer, player } from "../main.js";
+import { camera, gameContainer, gameTimeRemaining, isStrawberryCollected, main, mainLevel, player, strawCount } from "../main.js";
 import { animationSystem } from "../systems/animationSystem.js";
 import { detectInput, initInputs, inputs, removeKey } from "../systems/input.js";
 import { gravity } from "../systems/physics.js";
+import { getTimeScore } from "./tutorial.js";
 
 let level;
 let carts;
 let bird;
 let snow;
+let death = false;
+let first = false;
 
 export let endScene = false;
 
-export async function firstLevel() {
+export async function firstLevel(reset = true) {
+    fadeFromBlack(7000);
+    if (mainLevel != null) {
+        if (reset == true) {
+            mainLevel.removeEntities();
+        }
+    }
+    resumeGame();
+    initInputs();
+
+    player.alive = true;
+    first = false;
+    gameState.isGameOver = false;
+    player.alive = true;
+    death = false;
+    camera.target = player;
+    player.freeze = false;
+
+    if (reset) {
+        player.lives = 3;
+        document.getElementById('live-count').textContent = `Lives: ${player.lives}`;
+    }
+
     player.position = {
-        x: 20,
-        y: 20
+        x: 10,
+        y: 150
     }
     const response = await fetch("./js/data/firstLevel.json");
     const levelData = await response.json();
@@ -53,8 +81,11 @@ export async function firstLevel() {
     });
     level.setConditions(conditions);
     level.addEntity(player);
-    carts = createCarts();
+
     makeStrawBerry();
+
+    carts = createCarts();
+
 
     initInputs();
 
@@ -141,7 +172,17 @@ function birdUpdate(bird, dt) {
 }
 
 
-function conditions(dt) {
+async function conditions(dt) {
+    if (player.alive == false && !first) {
+        first = true;
+        stopGame();
+        await wait(1000);
+
+        mainLevel.removeEntities();
+        let newLevel = await firstLevel(false);
+        main(newLevel);
+        deathCount()
+    }
     snow.update(dt);
 
     if (player.position.y >= 500) {
@@ -199,6 +240,9 @@ function conditions(dt) {
     if (player.position.x <= 3277 && player.position.y <= -2609 && !endScene) {
         endScene = true;
         end();
+        await wait(7000);
+        const gameHud = document.getElementById("game-hud").classList.add("hidden");
+        showEndDialogue((Math.round( (getCollectableScore(strawCount) + getTimeScore(gameTimeRemaining) ) / 2)));
     }
     // 3277 2-609
 
@@ -207,12 +251,16 @@ function conditions(dt) {
 
 function makeStrawBerry() {
     const positions = [
-        { x: 1450, y: -400, id: "" },
-        { x: 3430, y: -1400 },
-        { x: 2430, y: -2400 }
+        { x: 1450, y: -400, id: "first-level-strawberry-1" },
+        { x: 3430, y: -1400, id: "first-level-strawberry-2" },
+        { x: 2430, y: -2400, id: "first-level-strawberry-3" }
     ];
 
     for (let i = 0; i < positions.length; i++) {
+        if (isStrawberryCollected(positions[i].id)) {
+            continue;
+        }
+
         const berry = new Entity({ x: positions[i].x, y: positions[i].y }, { height: 64, width: 64 }, positions[i].id);
         berry.elem.classList.add("strawBerry");
         berry.elem.classList.add("none-collision");
@@ -310,5 +358,13 @@ async function end() {
     playAnimation(player, "sit");
 
     bird.setUpdate(birdUpdate);
+}
+
+function getCollectableScore(collected) {
+    const totalCollectables = 3;
+
+    collected = Math.max(0, Math.min(collected, totalCollectables));
+
+    return Math.round((collected / totalCollectables) * 100);
 }
 
