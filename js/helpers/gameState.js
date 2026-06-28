@@ -1,8 +1,10 @@
 import { inputs, keys } from "../systems/input.js";
+import { showMainMenu, stopGame } from "./mainMenu.js";
 
 const pauseMenu = document.getElementById("pause-menu");
 const continueBtn = document.getElementById("continue-btn");
 const restartBtn = document.getElementsByClassName("restart-btn");
+const mainMenu = document.getElementById('main-menu-btn');
 
 export const gameState = {
   score: 0,
@@ -17,6 +19,12 @@ export const gameState = {
   pauseStartTime: 0,
   totalPauseTime: 0,
 };
+
+mainMenu.addEventListener('click', () => {
+  stopGame();
+  pauseMenu.classList.add("hidden");
+  showMainMenu();
+})
 
 export function pauseGame() {
   gameState.isPaused = true;

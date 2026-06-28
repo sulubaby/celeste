@@ -34,7 +34,7 @@ document.getElementById('tutorial-btn').addEventListener('click', async () => {
   hideMainMenu();
   setLevel(0);
   const level = await createTutorial();
-  main(level)
+  main(level);
 })
 
 document.getElementById('oldSite').addEventListener('click', async () => {
@@ -79,4 +79,42 @@ export function hideWinScreen() {
 
 winMainMenuBtn.addEventListener("click", () => {
   hideWinScreen();
+});
+
+const endDialogue = document.getElementById("end-dialogue");
+const endDialogueImage = document.getElementById("end-dialogue-image");
+const endDialogueScore = document.getElementById("end-dialogue-score");
+const endDialogueRestartBtn = document.getElementById("end-dialogue-restart-btn");
+const endDialogueMainMenuBtn = document.getElementById("end-dialogue-main-menu-btn");
+
+export function showEndDialogue(score, imageSrc = null) {
+  if (imageSrc) {
+    endDialogueImage.src = imageSrc;
+  }
+
+  endDialogueScore.textContent = `Score: ${score}`;
+  endDialogue.classList.remove("hidden");
+}
+
+export function hideEndDialogue() {
+  endDialogue.classList.add("hidden");
+}
+
+endDialogueRestartBtn.addEventListener("click", async () => {
+  hideEndDialogue();
+  stopGame();
+
+  await wait(500);
+  mainLevel.removeEntities();
+  const func = levels[level];
+  const newLevel = await func();
+  main(newLevel);
+  resumeGame();
+
+});
+
+endDialogueMainMenuBtn.addEventListener("click", () => {
+  hideEndDialogue();
+  stopGame();
+  showMainMenu();
 });

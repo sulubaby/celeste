@@ -65,7 +65,7 @@
                 <polygon points="60,28 92,68 60,68" fill="#bfe9ff" />
                 <polygon points="60,28 78,68 60,68" fill="#8fd2f4" />
             </svg>
-            
+
             <h1 class="menu-title">paused</h1>
 
             <nav class="menu-list">
@@ -84,6 +84,26 @@
         </div>
     </div>
 
+    <div id="end-dialogue" class="dialogue-box end-dialogue hidden">
+        <img id="end-dialogue-image" src="./assets/faces/madline.png" alt="">
+
+        <div class="dialogue-content end-dialogue-content">
+            <h2>Level Complete</h2>
+            <p id="end-dialogue-score">Score: 0</p>
+
+            <div class="end-dialogue-buttons">
+                <button id="end-dialogue-restart-btn" class="menu-row">
+                    <span class="menu-row-icon">↺</span>
+                    <span class="menu-row-label">Restart</span>
+                </button>
+                <button id="end-dialogue-main-menu-btn" class="menu-row">
+                    <span class="menu-row-icon"></span>
+                    <span class="menu-row-label">Main Menu</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="win-screen" class="hidden">
         <div class="menu-content win-content">
             <svg class="menu-logo" viewBox="0 0 100 90" aria-hidden="true">
@@ -97,12 +117,12 @@
             <h1 class="menu-title">level complete</h1>
 
             <div class="win-collectable">
-                <img id="win-collectable-icon" class="win-collectable-icon" src=""
-                    alt="Collectable">
+                <img id="win-collectable-icon" class="win-collectable-icon" src="" alt="Collectable">
                 <span id="win-collectable-count" class="win-collectable-count">0 / 0</span>
             </div>
 
             <nav class="menu-list">
+
                 <button id="win-main-menu-btn" class="menu-row">
                     <span class="menu-row-icon">🏠</span>
                     <span class="menu-row-label">Main Menu</span>

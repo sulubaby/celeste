@@ -12,7 +12,8 @@ import { detectInput, initInputs, inputs, keys, removeKey } from "../systems/inp
 import { showDialogue, wait } from "../helpers/scene.js";
 import { createSnow } from "../helpers/snow.js";
 import { createBird } from "../entities/bird.js";
-import { showMainMenu, showWinScreen, stopGame } from "../helpers/mainMenu.js";
+import { showEndDialogue, showMainMenu, showWinScreen, stopGame } from "../helpers/mainMenu.js";
+import { resumeGame } from "../helpers/gameState.js";
 
 let fallingBlocks;
 let level;
@@ -33,6 +34,8 @@ let positionX = 0;
 let positionY = 0;
 
 export async function createTutorial() {
+    resumeGame()
+    initInputs();
     fallingBlocks = createFallingBlock();
     player.alive = true;
     death = false;
@@ -55,10 +58,11 @@ export async function createTutorial() {
     const response = await fetch("./js/data/levels.json");
     const levelData = await response.json();
     bird = createBird();
-    
+
     level = new Level({ height: 550, width: 1200 }, gameContainer);
     level.addSystem(gravity);
     camera.target = player;
+    player.freeze = false;
     level.addSystem(animationSystem);
     level.addEntity(bird);
 
@@ -110,7 +114,7 @@ export async function createTutorial() {
     initInputs();
     level.setConditions(conditions);
     snow = createSnow(gameContainer);
-
+    level.end = false;
     return level;
 }
 
@@ -197,13 +201,12 @@ async function conditions(dt) {
             if (camera.position.y <= -100) {
                 clearInterval(loop);
                 if (!level.end) {
-                    revealTitle(document.getElementById('title'), 'YOU CAN DO IT');
                     level.end = true
 
                     await wait(3500);
                     stopGame();
                     levels.tutorial = true;
-                    showWinScreen(0, 0);
+                    showEndDialogue(1, null);
                 }
             }
         }
